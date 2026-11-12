@@ -2,7 +2,7 @@
   (:require
    [quil.core :as q]
    [quil.middleware :as m]
-   [lift.config :refer [scene-width scene-height text-size]]
+   [lift.drawings :refer [scene-width scene-height text-size]]
    [lift.methods :refer [update-state draw key-press key-release reset-state]]))
 
 

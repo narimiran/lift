@@ -1,63 +1,19 @@
 (ns lift.game
   (:require
    [quil.core :as q]
-   [lift.config :refer [text-size game-width margin size
-                        game-height floor-height]]
-   [lift.lift :as lift]
+   [lift.drawings :as draw]
    [lift.methods :refer [draw update-state key-press reset-state]]))
 
-
-(defn- draw-stats [moves open-doors]
-  (q/text-style :normal)
-  (q/text-align :left)
-  (q/text-size text-size)
-  (q/no-stroke)
-  (q/fill 0)
-  (q/text (str "Moves: " moves)
-          (+ game-width margin)
-          margin)
-  (q/text (str "Doors open: " open-doors)
-          (+ game-width margin)
-          (* 2 margin)))
-
-
-
-(defn- draw-waiters [waiters]
-  (q/text-style :normal)
-  (q/text-align :left)
-  (q/text-size text-size)
-  (q/no-stroke)
-  (q/fill 0)
-  (doseq [[i wtrs] (group-by :start waiters)]
-    (let [y (- game-height size (* i floor-height) (/ size 2))]
-      (doseq [[j p] (map-indexed vector wtrs)]
-        (q/text (:end p)
-                (+ (* 0.8 j size) (* 14 size))
-                y)))))
-
-(defn- draw-passengers [passengers floor]
-  (q/text-style :normal)
-  (q/text-align :left)
-  (q/text-size text-size)
-  (q/no-stroke)
-  (q/fill 0)
-  (let [y (- game-height size (* floor floor-height) (/ size 2))]
-    (doseq [[i p] (map-indexed vector (sort-by :end passengers))]
-      (q/text (:end p)
-              (+ (* 0.8 i size) (* 2 margin))
-              y))))
 
 (defmethod draw :game
   [{:keys [floor moves waiters passengers open-doors]}]
   (q/background 200)
-  (lift/draw-game-space)
-  (lift/draw-lift floor)
-  (lift/draw-floors)
-  (draw-stats moves open-doors)
-  (draw-waiters waiters)
-  (draw-passengers passengers floor))
-
-
+  (draw/game-space)
+  (draw/lift floor)
+  (draw/floors)
+  (draw/stats moves open-doors)
+  (draw/waiters waiters)
+  (draw/passengers passengers floor))
 
 
 
@@ -70,7 +26,6 @@
 
 (defn- go-out [passengers floor]
   (remove #(= floor (:end %)) passengers))
-
 
 (defn- open-doors [{:keys [floor waiters] :as state}]
   (let [{new-passengers true, remaining-waiters false}

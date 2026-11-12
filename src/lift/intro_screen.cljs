@@ -1,42 +1,19 @@
 (ns lift.intro-screen
   (:require
    [quil.core :as q]
-   [lift.config :refer [scene-width scene-height
-                        game-width
-                        title-size text-size]]
-   [lift.lift :as lift]
+   [lift.drawings :as draw]
    [lift.methods :refer [draw update-state key-press reset-state]]))
-
-
-(defn- draw-title []
-  (q/text-size title-size)
-  (q/text-align :center)
-  (q/text-style :bold)
-  (q/stroke 0)
-  (q/fill 255)
-  (q/text "Lift"
-          (+ game-width (/ (- scene-width game-width) 2))
-          (* 0.3 scene-height)))
-
-(defn- draw-text []
-  (q/text-style :normal)
-  (q/text-align :center)
-  (q/text-size (* 1.3 text-size))
-  (q/stroke 0)
-  (q/fill 255)
-  (q/text "Press   SPACE   to play"
-           (+ game-width (/ (- scene-width game-width) 2))
-           (* 0.7 scene-height)))
 
 
 (defmethod draw :intro
   [{:keys [floor]}]
   (q/background 80)
-  (lift/draw-game-space)
-  (lift/draw-lift floor)
-  (lift/draw-floors)
-  (draw-title)
-  (draw-text))
+  (draw/game-space)
+  (draw/lift floor)
+  (draw/floors)
+  (draw/intro-title)
+  (draw/intro-text))
+
 
 (defmethod update-state :intro
   [{:keys [floor direction] :as state}]
@@ -47,9 +24,9 @@
         (assoc :direction dir)
         (update :floor #(+ dir %)))))
 
+
 (defmethod key-press :intro
   [state]
-
   (let [k (q/key-as-keyword)]
     (case k
       :space (reset-state :game)
