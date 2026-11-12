@@ -25,6 +25,7 @@
   {:screen-type (or screen-type :intro)
    :floor 0
    :moves 0
+   :open-doors 0
    :waiters []
    :passengers []
    :made-move? false
