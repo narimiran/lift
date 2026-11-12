@@ -38,8 +38,9 @@
   (q/stroke-weight 2)
   (q/text-size (* 2 text-size))
   (q/text-style :bold)
+  (q/text-align :left)
   (doseq [i (range 10)]
     (let [y (- game-height size (* i floor-height))]
-      (q/text i (* 13 size) (- y (/ size 2)))
+      (q/text i (* 12.5 size) (- y (/ size 2)))
       (q/line (* 14 size) y
               (* 20 size) y))))

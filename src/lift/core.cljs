@@ -28,6 +28,7 @@
   (q/text-font "monospace" text-size)
   {:screen-type :intro
    :floor 0
+   :moves 0
    :direction 0.03})
 
 

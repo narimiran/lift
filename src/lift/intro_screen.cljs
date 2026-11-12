@@ -1,13 +1,11 @@
 (ns lift.intro-screen
   (:require
    [quil.core :as q]
-   [lift.lift :as lift]
-   [lift.methods :refer [draw update-state]]
    [lift.config :refer [scene-width scene-height
                         game-width
                         title-size text-size]]
    [lift.lift :as lift]
-   [lift.methods :refer [draw update-state]]))
+   [lift.methods :refer [draw update-state key-press]]))
 
 
 (defn- draw-title []
@@ -48,3 +46,14 @@
     (-> state
         (assoc :direction dir)
         (update :floor #(+ dir %)))))
+
+(defmethod key-press :intro
+  [state]
+
+  (let [k (q/key-as-keyword)]
+    (case k
+      :space (-> state
+                 (assoc :floor 0)
+                 (assoc :moves 0)
+                 (assoc :screen-type :game))
+      state)))
