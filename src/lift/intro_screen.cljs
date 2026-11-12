@@ -5,7 +5,7 @@
                         game-width
                         title-size text-size]]
    [lift.lift :as lift]
-   [lift.methods :refer [draw update-state key-press]]))
+   [lift.methods :refer [draw update-state key-press reset-state]]))
 
 
 (defn- draw-title []
@@ -52,8 +52,5 @@
 
   (let [k (q/key-as-keyword)]
     (case k
-      :space (-> state
-                 (assoc :floor 0)
-                 (assoc :moves 0)
-                 (assoc :screen-type :game))
+      :space (reset-state :game)
       state)))

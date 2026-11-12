@@ -3,7 +3,7 @@
    [quil.core :as q]
    [quil.middleware :as m]
    [lift.config :refer [scene-width scene-height text-size]]
-   [lift.methods :refer [update-state draw key-press key-release]]))
+   [lift.methods :refer [update-state draw key-press key-release reset-state]]))
 
 
 (defn- prevent-defaults []
@@ -26,10 +26,7 @@
   (q/no-stroke)
   (q/ellipse-mode :corner)
   (q/text-font "monospace" text-size)
-  {:screen-type :intro
-   :floor 0
-   :moves 0
-   :direction 0.03})
+  (reset-state))
 
 
 (defn -main []

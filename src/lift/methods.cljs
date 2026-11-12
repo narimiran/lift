@@ -19,3 +19,13 @@
 (defmethod key-release :default
   [state _e]
   state)
+
+
+(defn reset-state [& [screen-type]]
+  {:screen-type (or screen-type :intro)
+   :floor 0
+   :moves 0
+   :waiters []
+   :passengers []
+   :made-move? false
+   :direction 0.03})
