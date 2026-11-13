@@ -1,6 +1,9 @@
 (ns lift.game)
 
 
+(def lift-capacity 10)
+
+
 (defn reset-state [& [screen-type]]
   {:screen-type (or screen-type :intro)
    :floor 0
@@ -29,6 +32,7 @@
         floor' (f floor)]
     (cond-> state
       (<= 0 floor' 9) (-> (assoc :floor floor')
+                          (dissoc :message)
                           (update :moves inc)
                           (update :waiters maybe-create-waiter moves)))))
 
@@ -48,9 +52,11 @@
         (group-by #(= floor (:end %)) passengers)
         passengers' (add-passengers remaining-passengers new-passengers moves)
         trip-done' (map #(calc-stats % moves) trip-done)]
-    (-> state
-        (update :open-doors inc)
-        (update :moves inc)
-        (assoc :passengers passengers')
-        (update :stats into trip-done')
-        (assoc :waiters remaining-waiters))))
+    (if (> (count passengers') lift-capacity)
+      (assoc state :message "At full capacity. Can't take new passengers.")
+      (-> state
+          (update :open-doors inc)
+          (update :moves inc)
+          (assoc :passengers passengers')
+          (update :stats into trip-done')
+          (assoc :waiters remaining-waiters)))))

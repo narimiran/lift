@@ -38,16 +38,17 @@
     (lift-view floor passengers)
     (floor-view waiters)]])
 
-(defn- stats-view [{:keys [moves open-doors stats]}]
+(defn- stats-view [{:keys [moves open-doors stats message]}]
   [:div.p-4
    [:p "Moves: " moves]
    [:p "Doors open: " open-doors]
+   [:p.font-italic message]
    [:div.mt-4
     (for [{:keys [waited traveled]} stats]
       [:p "Waited: " waited "; Traveled: " traveled])]])
 
 (defn game-view [state]
-  [:div.flex.w-200.bg-gray-300.m-2.p-4.gap-4.items-start
+  [:div.flex.h-178.w-200.bg-gray-300.m-2.p-4.gap-4.items-start
    (board-view state)
    (stats-view state)])
 
