@@ -3,3 +3,4 @@ node_modules/
 .cpcache
 .shadow-cljs
 docs/js
+docs/css

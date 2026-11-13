@@ -4,5 +4,9 @@
   "private": true,
   "devDependencies": {
     "shadow-cljs": "^3.5.13"
+  },
+  "dependencies": {
+    "@tailwindcss/cli": "^4.3.5",
+    "tailwindcss": "^4.3.5"
   }
 }
