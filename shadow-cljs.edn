@@ -4,4 +4,4 @@
           {:target     :browser
            :output-dir "docs/js"
            :asset-path "js"
-           :modules    {:main {:init-fn lift.core/-main}}}}}
+           :modules    {:main {:init-fn lift.dev/main}}}}}

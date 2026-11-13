@@ -1,42 +1,57 @@
 (ns lift.core
   (:require
-   [quil.core :as q]
-   [quil.middleware :as m]
-   [lift.drawings :refer [scene-width scene-height text-size]]
-   [lift.methods :refer [update-state draw key-press key-release reset-state]]))
+   [nexus.core :as nexus]
+   [replicant.dom :as r]
+   [lift.game :as game]
+   [lift.views :as views]))
 
 
-(defn- prevent-defaults []
-  (.addEventListener
-   js/document.body
-   "keydown"
-   (fn [e]
-     (when (#{9 32         ; tab, space
-              37 38 39 40  ; arrows
-              87 65 83 68} ; wasd
-            (.-keyCode e))
-       (.preventDefault e)))))
-
-(defn- settings []
-  (q/smooth 8))
-
-(defn- setup []
-  (prevent-defaults)
-  (q/frame-rate 60)
-  (q/no-stroke)
-  (q/ellipse-mode :corner)
-  (q/text-font "monospace" text-size)
-  (reset-state))
+(def actions
+  {:game/key (fn [state k]
+               (case (:screen-type state)
+                 :intro (case k
+                          " " [[:dom/prevent-default] [:game/start]]
+                          nil)
+                 :game (case k
+                         " " [[:dom/prevent-default] [:game/doors]]
+                         ("w" "ArrowUp")   [[:dom/prevent-default] [:game/move :up]]
+                         ("s" "ArrowDown") [[:dom/prevent-default] [:game/move :down]]
+                         "q" [[:dom/prevent-default] [:game/quit]]
+                         nil)
+                 nil))
+   :game/start (fn [_] [[:store/reset (game/reset-state :game)]])
+   :game/quit  (fn [_] [[:store/reset (game/reset-state :intro)]])
+   :game/doors (fn [state] [[:store/reset (game/open-doors state)]])
+   :game/move  (fn [state dir] [[:store/reset (game/move state dir)]])})
 
 
-(defn -main []
-  (q/sketch
-   :host "app"
-   :size [scene-width scene-height]
-   :settings #'settings
-   :setup #'setup
-   :update #'update-state
-   :draw #'draw
-   :key-pressed #'key-press
-   :key-released #'key-release
-   :middleware [m/fun-mode]))
+(def effects
+  {:dom/prevent-default (fn [{:keys [dispatch-data]} _]
+                          (some-> (:replicant/dom-event dispatch-data)
+                                  .preventDefault))
+   :store/reset (fn [_ store new-state]
+                  (reset! store new-state))})
+
+
+(def nex
+  {:nexus/system->state deref
+   :nexus/actions actions
+   :nexus/effects effects})
+
+
+(defn main [nex store]
+  (let [element (js/document.getElementById "app")]
+    (r/set-dispatch!
+     (fn [replicant-data action-data]
+       (nexus/dispatch nex store replicant-data action-data)))
+    (js/document.addEventListener
+     "keydown"
+     (fn [e]
+       (nexus/dispatch nex store
+                       {:replicant/dom-event e}
+                       [[:game/key (.-key e)]])))
+    (add-watch store
+               ::render
+               (fn [_ _ _ new-state]
+                 (r/render element (views/view new-state))))
+    (r/render element (views/view @store))))
