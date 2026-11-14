@@ -12,9 +12,13 @@
 (defn- destinations [people]
   (interpose " " (map :end people)))
 
-(defn- lift-view [floor passengers]
+(defn- lift-view [floor passengers message]
   [:div.absolute.w-40.h-14.ml-6.mb-5.bg-white.border-4.border-black.rounded-lg.transition-all.duration-400
-   {:style {:bottom (str "calc(" floor " * 4rem)")}}
+   {:class (case (first message)
+             (:full-cap :door-close) [:animate-shake]
+             :wrong-floor [:animate-bounce]
+             nil)
+    :style {:bottom (str "calc(" floor " * 4rem)")}}
    [:div.flex.h-full.px-1.items-end
     (destinations passengers)]])
 
@@ -31,18 +35,18 @@
      (for [i (range 10)]
        (floor-row i (get by-floor i)))]))
 
-(defn- board-view [{:keys [floor waiters passengers]}]
+(defn- board-view [{:keys [floor waiters passengers message]}]
   [:div.w-100.bg-white.border-2.border-black.rounded-lg
    [:div.relative.h-168
     [:div.absolute.inset-4.w-44.bg-gray-500.border-2.border-black.rounded-lg]
-    (lift-view floor passengers)
+    (lift-view floor passengers message)
     (floor-view waiters)]])
 
 (defn- stats-view [{:keys [moves open-doors stats message]}]
   [:div.p-4
    [:p "Moves: " moves]
    [:p "Doors open: " open-doors]
-   [:p.font-italic message]
+   [:p.italic (second message)]
    [:div.mt-4
     (for [{:keys [waited traveled]} stats]
       [:p "Waited: " waited "; Traveled: " traveled])]])
