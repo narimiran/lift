@@ -57,7 +57,9 @@
         trip-done' (map #(calc-stats % moves) trip-done)]
     (cond
       (> (count passengers') lift-capacity)
-      (assoc state :message [:full-cap "Can't take all new passengers. Skipping."])
+      (-> state
+          (assoc :passengers remaining-passengers)
+          (assoc :message [:full-cap "Can't take all new passengers. Taking nobody."]))
       (and (zero? (count new-passengers)) (zero? (count trip-done)))
       (assoc state :message [:door-close "No need to open the door."])
       :else (-> state
