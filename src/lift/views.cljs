@@ -9,9 +9,6 @@
 
 
 
-(defn- destinations [people]
-  (interpose " " (map :end people)))
-
 (defn- lift-view [floor passengers message]
   [:div.absolute.w-40.h-14.ml-6.mb-5.bg-white.border-4.border-black.rounded-lg.transition-all.duration-400
    {:class (case (first message)
@@ -19,15 +16,21 @@
              :wrong-floor [:animate-bounce]
              nil)
     :style {:bottom (str "calc(" floor " * 4rem)")}}
-   [:div.flex.h-full.px-1.items-end
-    (destinations passengers)]])
+   [:div.flex.h-full.px-1.gap-1.items-end
+    (for [end (map :end passengers)]
+      [:span.font-mono
+       {:class (when (= floor end) [:font-bold])}
+       end])]])
 
 (defn- floor-row [i waiters]
   [:div.flex.h-16.ml-50.mr-2.items-end
    [:div.flex.flex-1.h-16.items-end.border-b-2.border-black
     [:div.flex.gap-3.items-end
      [:div.text-3xl.font-bold i]
-     (destinations waiters)]]])
+     [:div.flex.gap-1
+      (for [end (map :end waiters)]
+        [:span.font-mono end])]]]])
+
 
 (defn- floor-view [waiters]
   (let [by-floor (group-by :start waiters)]
