@@ -4,7 +4,9 @@
 (defn- intro-view [_state]
   [:div.flex.flex-col.h-168.w-200.m-2.p-8.items-center.justify-center.bg-orange-100
    [:h1.text-5xl.p-16.font-black "Lift"]
-   [:div.p-16.font-mono "press SPACE for start"]])
+   [:button.btn.p-8.font-mono.border-1.border-black.rounded-lg
+    {:on {:click [[:game/start]]}}
+    "press SPACE for start"]])
 
 
 
@@ -46,7 +48,7 @@
     (floor-view waiters)]])
 
 (defn- stats-view [{:keys [moves open-doors stats message]}]
-  [:div.p-4
+  [:div
    [:p "Moves: " moves]
    [:p "Doors open: " open-doors]
    [:p.italic (second message)]
@@ -54,9 +56,25 @@
     (for [{:keys [waited traveled]} stats]
       [:p "Waited: " waited "; Traveled: " traveled])]])
 
+
+(defn- button [text on-click]
+  [:button.flex.flex-wrap.btn.h-12.bg-white.hover:bg-gray-300.px-8.border-2.border-black.rounded.font-bold.text-2xl.content-center.cursor-pointer
+   {:on {:click on-click}}
+   text])
+
+(defn button-view []
+  [:div.flex.h-12.gap-4.justify-between.items-stretch
+   (button "⇧" [[:game/move :up]])
+   (button "⇦ ⇨" [[:game/doors]])
+   (button "⇩" [[:game/move :down]])])
+
+
+
 (defn game-view [state]
-  [:div.flex.h-178.w-200.bg-gray-300.m-2.p-4.gap-4.items-start
-   (board-view state)
+  [:div.flex.h-192.w-200.bg-gray-300.m-2.p-4.gap-8.items-start
+   [:div.flex.flex-col.gap-4
+    (board-view state)
+    (button-view)]
    (stats-view state)])
 
 
