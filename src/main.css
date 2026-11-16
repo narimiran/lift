@@ -11,6 +11,7 @@
     80%      { transform: translateX(4px); }
   }
 
+
   --animate-bounce: bounce 0.4s ease-in-out;
 
   @keyframes bounce {
@@ -20,4 +21,21 @@
     60%      { transform: translateY(-3px); }
     80%      { transform: translateY(3px); }
   }
+
+
+  --animate-impatient: impatient 0.15s infinite alternate;
+
+  @keyframes impatient {
+    from { transform: translateY(0); }
+    to { transform: translateY(-4px); }
+  }
+
+
+  /* --animate-relaxed: relaxed 2s ease-in-out infinite; */
+
+  /* @keyframes relaxed { */
+  /*   0%, 50%, 100% { transform: skewX(0); } */
+  /*   25% { transform: skewX(-10deg); } */
+  /*   75% { transform: skewX(10deg); } */
+  /* } */
 }

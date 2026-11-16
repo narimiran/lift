@@ -19,9 +19,12 @@
              nil)
     :style {:bottom (str "calc(" floor " * 4rem)")}}
    [:div.flex.h-full.px-1.gap-1.items-end
-    (for [end (map :end passengers)]
+    (for [{:keys [end impatient? relaxed?]} passengers]
       [:span.font-mono
-       {:class (when (= floor end) [:font-bold])}
+       {:class (cond-> []
+                 (= floor end) (conj :font-bold)
+                 impatient? (conj :animate-impatient)
+                 relaxed? (conj :italic))}
        end])]])
 
 (defn- floor-row [i waiters]
@@ -30,8 +33,12 @@
     [:div.flex.gap-3.items-end
      [:div.text-3xl.font-bold i]
      [:div.flex.gap-1
-      (for [end (map :end waiters)]
-        [:span.font-mono end])]]]])
+      (for [{:keys [end impatient? relaxed?]} waiters]
+        [:span.font-mono
+         {:class (cond
+                   impatient? [:font-bold :animate-impatient]
+                   relaxed? [:italic])}
+         end])]]]])
 
 
 (defn- floor-view [waiters]
@@ -47,18 +54,26 @@
     (lift-view floor passengers message)
     (floor-view waiters)]])
 
-(defn- stats-view [{:keys [moves open-doors stats message]}]
+(defn- stats-view [{:keys [score moves open-doors finished message]}]
   [:div
+   [:p "Score: " score]
    [:p "Moves: " moves]
    [:p "Doors open: " open-doors]
    [:p.italic (second message)]
    [:div.mt-4
-    (for [{:keys [waited traveled]} stats]
-      [:p "Waited: " waited "; Traveled: " traveled])]])
+    ; debugging/experimenting:
+    (for [{:keys [waited traveled impatient? relaxed? direct? score]} finished]
+      [:div.flex.gap-1
+       [:span "Waited: " waited]
+       [:span "Traveled: " traveled]
+       (when direct? [:span "direct!"])
+       (when impatient? [:span "impatient!"])
+       (when relaxed? [:span "relaxed..."])
+       [:span "Score: " score]])]])
 
 
 (defn- button [text on-click]
-  [:button.flex.flex-wrap.btn.h-12.bg-white.hover:bg-gray-300.px-8.border-2.border-black.rounded.font-bold.text-2xl.content-center.cursor-pointer
+  [:button.flex.flex-wrap.btn.h-12.bg-white.hover:bg-gray-300.px-8.border-4.border-black.rounded-lg.font-bold.text-2xl.content-center.cursor-pointer
    {:on {:click on-click}}
    text])
 

@@ -8,21 +8,25 @@
   {:screen-type (or screen-type :intro)
    :floor 0
    :moves 0
+   :score 0
    :open-doors 0
    :message []
    :waiters []
    :passengers []
-   :stats []})
+   :finished []})
 
 
 (defn- create-waiter [t]
   (let [start (rand-int 10)
-        end (rand-int 10)]
+        end (rand-int 10)
+        r (rand)]
     (if (= start end)
       (create-waiter t)
       {:start start
        :end end
-       :created-at t})))
+       :created-at t
+       :impatient? (> r 0.9)
+       :relaxed? (< r 0.15)})))
 
 (defn- maybe-create-waiter [waiters t]
   (cond-> waiters
@@ -44,9 +48,22 @@
   (let [new-psgs (map #(assoc % :trip-start t) new-passengers)]
     (into passengers new-psgs)))
 
-(defn- calc-stats [{:keys [created-at trip-start]} t]
-  {:waited (- trip-start created-at)
-   :traveled (- t trip-start 1)})
+(defn- calc-stats [{:keys [created-at trip-start impatient? relaxed?
+                           start end] :as passengers} t]
+  (let [waited (- trip-start created-at)
+        traveled (- t trip-start 1)
+        multi (cond
+                impatient? 1.5
+                relaxed? 0.8
+                :else 1)
+        direct? (= traveled (abs (- end start)))
+        score (max 0 (long (- 100 (* 2 multi waited) (* multi traveled))))]
+    (-> passengers
+        (assoc :waited waited)
+        (assoc :traveled traveled)
+        (assoc :direct? direct?) ; needed just for debugging/experimenting
+        (assoc :score (cond-> score
+                        direct? (* 2))))))
 
 (defn open-doors [{:keys [floor waiters passengers moves] :as state}]
   (let [{new-passengers true, remaining-waiters false}
@@ -54,17 +71,22 @@
         {trip-done true, remaining-passengers false}
         (group-by #(= floor (:end %)) passengers)
         passengers' (add-passengers remaining-passengers new-passengers moves)
-        trip-done' (map #(calc-stats % moves) trip-done)]
+        trip-done' (map #(calc-stats % moves) trip-done)
+        score (reduce + (map :score trip-done'))]
     (cond
       (> (count passengers') lift-capacity)
       (-> state
           (assoc :passengers remaining-passengers)
+          (update :finished into trip-done')
+          (update :score + score)
           (assoc :message [:full-cap "Can't take all new passengers. Taking nobody."]))
       (and (zero? (count new-passengers)) (zero? (count trip-done)))
       (assoc state :message [:door-close "No need to open the door."])
       :else (-> state
                 (update :open-doors inc)
                 (update :moves inc)
+                (dissoc :message)
                 (assoc :passengers passengers')
-                (update :stats into trip-done')
+                (update :finished into trip-done')
+                (update :score + score)
                 (assoc :waiters remaining-waiters)))))
