@@ -93,7 +93,19 @@
    (stats-view state)])
 
 
+
+(defn end-view [{:keys [score high-score]}]
+  [:div.flex.flex-col.h-168.w-200.m-2.p-8.items-center.justify-center.bg-orange-100
+   [:h1.text-5xl.p-16.font-black "Game over!"]
+   [:div "Your score: " score]
+   [:div.mb-8 "Your best score so far: " high-score]
+   [:button.btn.p-8.font-mono.border-1.border-black.rounded-lg
+    {:on {:click [[:game/start]]}}
+    "press SPACE to play again"]])
+
+
 (defn view [state]
   (case (:screen-type state)
     :intro (intro-view state)
-    :game (game-view state)))
+    :game (game-view state)
+    :over (end-view state)))

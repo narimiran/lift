@@ -9,20 +9,22 @@
 (def actions
   {:game/key (fn [state k]
                (case (:screen-type state)
-                 :intro (case k
-                          " " [[:dom/prevent-default] [:game/start]]
-                          nil)
+                 (:intro :over) (case k
+                                  " " [[:dom/prevent-default] [:game/start]]
+                                  nil)
                  :game (case k
-                         " " [[:dom/prevent-default] [:game/doors]]
-                         ("w" "ArrowUp")   [[:dom/prevent-default] [:game/move :up]]
-                         ("s" "ArrowDown") [[:dom/prevent-default] [:game/move :down]]
+                         " " [[:game/tic [:game/doors]]]
+                         ("w" "ArrowUp")   [[:game/tic [:game/move :up]]]
+                         ("s" "ArrowDown") [[:game/tic [:game/move :down]]]
                          "q" [[:dom/prevent-default] [:game/quit]]
                          nil)
                  nil))
+   :game/tic   (fn [_ action] [[:dom/prevent-default] action [:game/over?]])
    :game/start (fn [_] [[:store/reset (game/reset-state :game)]])
    :game/quit  (fn [_] [[:store/reset (game/reset-state :intro)]])
    :game/doors (fn [state] [[:store/reset (game/open-doors state)]])
-   :game/move  (fn [state dir] [[:store/reset (game/move state dir)]])})
+   :game/move  (fn [state dir] [[:store/reset (game/move state dir)]])
+   :game/over? (fn [state] [[:store/reset (game/maybe-end state)]])})
 
 
 (def effects

@@ -32,6 +32,15 @@
    :passengers []
    :finished []})
 
+(defn maybe-end [{:keys [moves score high-score] :as state}]
+  (if (> moves 100)
+    (let [record (max score high-score)]
+      (.. js/window -localStorage (setItem :lift-high-score record))
+      (-> state
+          (assoc :screen-type :over)
+          (assoc :high-score record)))
+    state))
+
 (defn move [{:keys [floor moves] :as state} dir]
   (let [f (case dir :up inc :down dec)
         floor' (f floor)]
