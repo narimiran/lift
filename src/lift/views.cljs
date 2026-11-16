@@ -11,10 +11,11 @@
 
 (defn- intro-view [_state]
   [:div.flex.flex-col.h-168.w-200.m-2.p-8.items-center.justify-center.bg-orange-100
-   [:h1.text-5xl.p-16.font-black "Lift"]
-   [:button.btn.p-8.font-mono.border-1.border-black.rounded-lg.cursor-pointer
+   [:h1.text-5xl.p-16.font-mono.font-black "Lift"]
+   [:button.btn.p-8.font-mono.text-xl.border-1.border-black.rounded-lg.cursor-pointer
     {:on {:click [[:game/start]]}}
-    "press SPACE for start"]])
+    "press SPACE for start"]
+   [:span.font-mono.text-sm.p-16 "press H for help"]])
 
 
 
@@ -113,8 +114,32 @@
     "press SPACE to play again"]])
 
 
+(defn help-view []
+  [:div.flex.flex-col.h-168.w-200.m-2.p-8.gap-2.bg-orange-100
+   [:h1.text-3xl "Lift: how to play?"]
+   [:p "You are a lift moving up and down, taking passengers.
+        You have a limited space for 10 persons at time.
+        If you want to open your doors to take and drop passengers, press SPACE.
+        There are different kinds of passengers:"]
+   [:div.flex.gap-2
+    (people-view [{:end 3}])
+    [:span "Regular passenger. Wants to go to the 3rd floor."]]
+   [:div.flex.gap-2
+    (people-view [{:end 5 :impatient? true}])
+    [:span "Impatient passenger. Hates waiting and wasting time."]]
+   [:div.flex.gap-2
+    (people-view [{:end 8 :relaxed? true}])
+    [:span "Relaxed passenger. Doesn't mind waiting longer."]]
+   [:p "If you take a passenger directly (no going in wrong direction nor opening
+        the doors along the way) to their destination, you receive a bonus.
+        The longer the passenger waits and travels, the lower the score.
+        The longer the distance between the starting and ending floor, the higher the score."]
+   [:p "The game ends after 100 moves. Opening the doors also counts as a move.
+        Time doesn't matter, just moves. Take your time."]])
+
 (defn view [state]
   (case (:screen-type state)
     :intro (intro-view state)
     :game (game-view state)
-    :over (end-view state)))
+    :over (end-view state)
+    :help (help-view)))

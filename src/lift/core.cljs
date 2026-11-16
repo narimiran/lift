@@ -11,17 +11,22 @@
                (case (:screen-type state)
                  (:intro :over) (case k
                                   " " [[:dom/prevent-default] [:game/start]]
-                                  nil)
+                                  "h" [[:game/help]])
+                 :help (case k
+                         ("h" " ") [[:game/back]])
                  :game (case k
                          " " [[:game/tic [:game/doors]]]
                          ("w" "ArrowUp")   [[:game/tic [:game/move :up]]]
                          ("s" "ArrowDown") [[:game/tic [:game/move :down]]]
-                         "q" [[:dom/prevent-default] [:game/quit]]
-                         nil)
-                 nil))
+                         "h" [[:game/help]]
+                         "q" [[:dom/prevent-default] [:game/quit]])))
    :game/tic   (fn [_ action] [[:dom/prevent-default] action [:game/over?]])
    :game/start (fn [_] [[:store/reset (game/reset-state :game)]])
    :game/quit  (fn [_] [[:store/reset (game/reset-state :intro)]])
+   :game/help  (fn [state] [[:store/reset (-> state
+                                              (assoc :old-screen (:screen-type state))
+                                              (assoc :screen-type :help))]])
+   :game/back  (fn [state] [[:store/reset (assoc state :screen-type (:old-screen state))]])
    :game/doors (fn [state] [[:store/reset (game/open-doors state)]])
    :game/move  (fn [state dir] [[:store/reset (game/move state dir)]])
    :game/over? (fn [state] [[:store/reset (game/maybe-end state)]])})
