@@ -65,8 +65,11 @@
                 impatient? 1.5
                 relaxed? 0.8
                 :else 1)
-        direct? (= traveled (abs (- end start)))
-        score (max 0 (long (- 100 (* 2 multi waited) (* multi traveled))))]
+        dist (abs (- end start))
+        direct? (= traveled dist)
+        score (max 0 (long (- (+ 80 (* dist dist))
+                              (* 2 multi waited)
+                              (* multi traveled))))]
     (-> passengers
         (assoc :waited waited)
         (assoc :traveled traveled)
