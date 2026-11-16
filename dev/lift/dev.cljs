@@ -12,7 +12,7 @@
     (action-log/install-logger nex log)))
 
 
-(defonce store (atom (game/reset-state)))
+(defonce store (atom (game/reset-state :intro)))
 (def nex (inspect-actions lift/nex))
 
 

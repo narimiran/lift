@@ -4,18 +4,6 @@
 (def lift-capacity 10)
 
 
-(defn reset-state [& [screen-type]]
-  {:screen-type (or screen-type :intro)
-   :floor 0
-   :moves 0
-   :score 0
-   :open-doors 0
-   :message []
-   :waiters []
-   :passengers []
-   :finished []})
-
-
 (defn- create-waiter [t]
   (let [start (rand-int 10)
         end (rand-int 10)
@@ -31,6 +19,18 @@
 (defn- maybe-create-waiter [waiters t]
   (cond-> waiters
     (< (rand) 0.5) (conj (create-waiter t))))
+
+(defn reset-state [screen-type]
+  {:screen-type (or screen-type :intro)
+   :high-score (or (.. js/window -localStorage (getItem :lift-high-score)) 0)
+   :floor 0
+   :moves 0
+   :score 0
+   :open-doors 0
+   :message []
+   :waiters (repeatedly 3 #(create-waiter 0))
+   :passengers []
+   :finished []})
 
 (defn move [{:keys [floor moves] :as state} dir]
   (let [f (case dir :up inc :down dec)
