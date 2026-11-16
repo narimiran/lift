@@ -20,8 +20,8 @@
 
 (defn- people-view [people & [floor]]
   (for [{:keys [end impatient? relaxed?]} people]
-    [:span.font-mono.px-1.border-1.border-black.rounded
-     {:class (cond-> [(bg-color end)]
+    [:span.font-mono.border-1.border-black.rounded.text-xl.leading-5
+     {:class (cond-> [(bg-color end) "px-[3px]" "mb-[2px]"]
               (= floor end) (conj :font-bold (bg-color end 400))
               impatient? (conj :animate-impatient)
               relaxed? (conj :italic :text-gray-600))}
@@ -35,7 +35,7 @@
              nil)
     :style {:bottom (str "calc(" floor " * 4rem)")}}
    [:div.flex.flex-wrap.h-full.gap-1.items-end
-    {:class ["px-[2px]"]}
+    {:class ["px-[1px]"]}
     (people-view passengers floor)]])
 
 
