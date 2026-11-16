@@ -12,7 +12,7 @@
 (defn- intro-view [_state]
   [:div.flex.flex-col.h-168.w-200.m-2.p-8.items-center.justify-center.bg-orange-100
    [:h1.text-5xl.p-16.font-black "Lift"]
-   [:button.btn.p-8.font-mono.border-1.border-black.rounded-lg
+   [:button.btn.p-8.font-mono.border-1.border-black.rounded-lg.cursor-pointer
     {:on {:click [[:game/start]]}}
     "press SPACE for start"]])
 
@@ -106,9 +106,9 @@
 (defn end-view [{:keys [score high-score]}]
   [:div.flex.flex-col.h-168.w-200.m-2.p-8.items-center.justify-center.bg-orange-100
    [:h1.text-5xl.p-16.font-black "Game over!"]
-   [:div "Your score: " score]
+   [:div "Current score: " score]
    [:div.mb-8 "Your best score so far: " high-score]
-   [:button.btn.p-8.font-mono.border-1.border-black.rounded-lg
+   [:button.btn.p-8.font-mono.border-1.border-black.rounded-lg.cursor-pointer
     {:on {:click [[:game/start]]}}
     "press SPACE to play again"]])
 
