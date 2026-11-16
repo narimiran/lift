@@ -64,11 +64,11 @@
     (lift-view floor passengers message)
     (floor-view waiters)]])
 
-(defn- stats-view [{:keys [score moves open-doors finished message]}]
+(defn- stats-view [{:keys [score moves doors finished message]}]
   [:div
    [:p "Score: " score]
    [:p "Moves: " moves]
-   [:p "Doors open: " open-doors]
+   [:p "Doors open: " doors]
    [:p.italic (second message)]
    [:div.mt-4
     ; debugging/experimenting:

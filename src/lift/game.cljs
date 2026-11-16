@@ -26,7 +26,7 @@
    :floor 0
    :moves 0
    :score 0
-   :open-doors 0
+   :doors 0
    :message []
    :waiters (repeatedly 3 #(create-waiter 0))
    :passengers []
@@ -88,6 +88,7 @@
     (cond
       (> (count passengers') lift-capacity)
       (-> state
+          (update :doors inc)
           (assoc :passengers remaining-passengers)
           (update :finished into trip-done')
           (update :score + score)
@@ -95,7 +96,7 @@
       (and (zero? (count new-passengers)) (zero? (count trip-done)))
       (assoc state :message [:door-close "No need to open the door."])
       :else (-> state
-                (update :open-doors inc)
+                (update :doors inc)
                 (update :moves inc)
                 (dissoc :message)
                 (assoc :passengers passengers')
