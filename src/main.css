@@ -1,5 +1,7 @@
 @import "tailwindcss";
 
+@source inline("{text,bg}-{slate,orange,amber,lime,emerald,cyan,blue,violet,fuchsia,rose}-{300,400}");
+
 @theme {
   --animate-shake: shake 0.4s ease-in-out;
 
@@ -23,11 +25,11 @@
   }
 
 
-  --animate-impatient: impatient 0.15s infinite alternate;
+  --animate-impatient: impatient 0.12s infinite alternate;
 
   @keyframes impatient {
     from { transform: translateY(0); }
-    to { transform: translateY(-4px); }
+    to { transform: translateY(-3px); }
   }
 
 

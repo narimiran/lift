@@ -1,5 +1,13 @@
 (ns lift.views)
 
+(def colors
+  [:slate :orange :amber :lime :emerald :cyan :blue :violet :fuchsia :rose])
+
+(defn bg-color [c & [h]]
+  (str "bg-" (name (colors c)) "-" (or h 300)))
+
+(defn text-color [c & [h]]
+  (str "text-" (name (colors c)) "-" (or h 400)))
 
 (defn- intro-view [_state]
   [:div.flex.flex-col.h-168.w-200.m-2.p-8.items-center.justify-center.bg-orange-100
@@ -10,35 +18,36 @@
 
 
 
+(defn- people-view [people & [floor]]
+  (for [{:keys [end impatient? relaxed?]} people]
+    [:span.font-mono.px-1.border-1.border-black.rounded
+     {:class (cond-> [(bg-color end)]
+              (= floor end) (conj :font-bold (bg-color end 400))
+              impatient? (conj :animate-impatient)
+              relaxed? (conj :italic :text-gray-600))}
+     end]))
 
 (defn- lift-view [floor passengers message]
-  [:div.absolute.w-40.h-14.ml-6.mb-5.bg-white.border-4.border-black.rounded-lg.transition-all.duration-400
+  [:div.absolute.w-32.h-16.ml-6.mb-5.bg-white.border-4.border-black.rounded-lg.transition-all.duration-400
    {:class (case (first message)
              (:full-cap :door-close) [:animate-shake]
              :wrong-floor [:animate-bounce]
              nil)
     :style {:bottom (str "calc(" floor " * 4rem)")}}
-   [:div.flex.h-full.px-1.gap-1.items-end
-    (for [{:keys [end impatient? relaxed?]} passengers]
-      [:span.font-mono
-       {:class (cond-> []
-                 (= floor end) (conj :font-bold)
-                 impatient? (conj :animate-impatient)
-                 relaxed? (conj :italic))}
-       end])]])
+   [:div.flex.flex-wrap.h-full.gap-1.items-end
+    {:class ["px-[2px]"]}
+    (people-view passengers floor)]])
+
 
 (defn- floor-row [i waiters]
-  [:div.flex.h-16.ml-50.mr-2.items-end
+  [:div.flex.h-16.ml-42.mr-2.items-end
    [:div.flex.flex-1.h-16.items-end.border-b-2.border-black
     [:div.flex.gap-3.items-end
-     [:div.text-3xl.font-bold i]
+     [:div.text-3xl.font-bold.px-2
+      {:class [(text-color i)]}
+      i]
      [:div.flex.gap-1
-      (for [{:keys [end impatient? relaxed?]} waiters]
-        [:span.font-mono
-         {:class (cond
-                   impatient? [:font-bold :animate-impatient]
-                   relaxed? [:italic])}
-         end])]]]])
+      (people-view waiters)]]]])
 
 
 (defn- floor-view [waiters]
@@ -49,8 +58,8 @@
 
 (defn- board-view [{:keys [floor waiters passengers message]}]
   [:div.w-100.bg-white.border-2.border-black.rounded-lg
-   [:div.relative.h-168
-    [:div.absolute.inset-4.w-44.bg-gray-500.border-2.border-black.rounded-lg]
+   [:div.relative.h-170
+    [:div.absolute.inset-4.w-36.bg-gray-500.border-2.border-black.rounded-lg]
     (lift-view floor passengers message)
     (floor-view waiters)]])
 
@@ -87,7 +96,7 @@
 
 (defn game-view [state]
   [:div.flex.h-192.w-200.bg-gray-300.m-2.p-4.gap-8.items-start
-   [:div.flex.flex-col.gap-4
+   [:div.flex.flex-col.gap-2
     (board-view state)
     (button-view)]
    (stats-view state)])
