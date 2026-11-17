@@ -9,7 +9,7 @@
 (defn text-color [c & [h]]
   (str "text-" (name (colors c)) "-" (or h 400)))
 
-(defn- intro-view [_state]
+(defn- intro-view []
   [:div.flex.flex-col.h-168.w-200.m-2.p-8.items-center.justify-center.bg-orange-100
    [:h1.text-5xl.p-16.font-mono.font-black "Lift"]
    [:button.btn.p-8.font-mono.text-xl.border-1.border-black.rounded-lg.cursor-pointer
@@ -152,7 +152,7 @@
 
 (defn view [state]
   (case (:screen-type state)
-    :intro (intro-view state)
+    :intro (intro-view)
     :game (game-view state)
     :over (end-view state)
     :help (help-view)))
