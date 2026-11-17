@@ -50,11 +50,11 @@
 
 (defn tick [state]
   (-> state
-      maybe-end
       (update :moves inc)
       (dissoc :message)
       (increase-time :waiters :waiting-time)
-      (increase-time :passengers :trip-time)))
+      (increase-time :passengers :trip-time)
+      maybe-end))
 
 (defn move [{:keys [floor] :as state} dir]
   (let [f (case dir :up inc :down dec)
