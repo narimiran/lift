@@ -21,14 +21,15 @@
 
 
 
-(defn- people-view [people {:keys [floor t]}]
-  (for [{:keys [end impatient? relaxed? x created-at]} people]
+(defn- people-view [people {:keys [floor]}]
+  (for [{:keys [end impatient? relaxed? x waiting-time]} people]
     [:span.font-mono.border-1.border-black.rounded.text-xl.leading-5.bottom-0
      {:class (cond-> [(bg-color end) "px-[3px]" "mb-[2px]"]
               (= floor end) (conj :font-bold (bg-color end 400))
               impatient? (conj :animate-impatient)
               relaxed? (conj :italic :text-gray-600)
-              (> (- t created-at) (- wait-limit 15)) (conj :animate-pulse))
+              (and (nil? floor)
+                   (> waiting-time (- wait-limit 15))) (conj :animate-pulse))
       :style (when x
                {:position :absolute
                 :left (str x "px")})}
@@ -46,15 +47,18 @@
     (people-view passengers {:floor floor})]])
 
 (defn- waiters-positions [waiters]
-  (reduce (fn [acc {:keys [created-at] :as w}]
+  (reduce (fn [acc {:keys [waiting-time] :as w}]
             (if-let [prev-x (:x (peek acc))]
-              (let [d (- created-at (:created-at (peek acc)))]
-                (conj acc (assoc w :x (+ prev-x d 20))))
-              (conj acc (assoc w :x 0))))
+              (let [d (- waiting-time (:waiting-time (peek acc)))]
+                (conj acc (assoc w :x
+                                 #_(+ prev-x (max waiting-time 20))
+                                 #_(max waiting-time (+ prev-x 20))
+                                 (+ prev-x d 20))))
+              (conj acc (assoc w :x waiting-time))))
           []
           waiters))
 
-(defn- floor-row [moves i waiters]
+(defn- floor-row [i waiters]
   [:div.flex.h-16.ml-42.mr-2.items-end
    [:div.flex.flex-1.h-16.items-end.border-b-2.border-black
     [:div.flex.gap-2.items-end
@@ -62,23 +66,23 @@
       {:class [(text-color i)]}
       i]
      [:div.flex.relative
-      (people-view waiters {:t moves})]]]])
+      (people-view waiters {})]]]])
 
 
-(defn- floor-view [waiters moves]
+(defn- floor-view [waiters]
   (let [by-floor (group-by :start waiters)]
     [:div.flex.flex-col-reverse.absolute.inset-0.mb-6
      (for [i (range 10)]
-       (floor-row moves i (->> (get by-floor i)
-                               (sort-by :created-at)
-                               (waiters-positions))))]))
+       (floor-row i (->> (get by-floor i)
+                         (sort-by :waiting-time)
+                         (waiters-positions))))]))
 
-(defn- board-view [{:keys [floor waiters passengers message moves]}]
+(defn- board-view [{:keys [floor waiters passengers message]}]
   [:div.w-100.bg-white.border-2.border-black.rounded-lg
    [:div.relative.h-170
     [:div.absolute.inset-4.w-36.bg-gray-500.border-2.border-black.rounded-lg]
     (lift-view floor passengers message)
-    (floor-view waiters moves)]])
+    (floor-view waiters)]])
 
 (defn- stats-view [{:keys [score moves doors finished message]}]
   [:div
@@ -88,10 +92,10 @@
    [:p.italic (second message)]
    [:div.mt-4
     ; debugging/experimenting:
-    (for [{:keys [waited traveled impatient? relaxed? direct? score]} finished]
+    (for [{:keys [waiting-time trip-time impatient? relaxed? direct? score]} finished]
       [:div.flex.gap-1
-       [:span "Waited: " waited]
-       [:span "Traveled: " traveled]
+       [:span "Waited: " waiting-time]
+       [:span "Traveled: " trip-time]
        (when direct? [:span "direct!"])
        (when impatient? [:span "impatient!"])
        (when relaxed? [:span "relaxed..."])
@@ -152,7 +156,7 @@
     (people-view [{:end 8 :relaxed? true}] {})
     [:span "Relaxed passenger. Doesn't mind waiting longer."]]
    [:div.flex.gap-2
-    (people-view [{:end 1 :created-at 0}] {:t 100})
+    (people-view [{:end 1 :waiting-time 100}] {})
     [:span "Waiting for a long time. Pick it up soon (or lose the game)."]]
    [:p "If you take a passenger directly (no going in wrong direction nor opening
         the doors along the way) to their destination, you receive a bonus.
