@@ -89,6 +89,7 @@
       (> (count passengers') lift-capacity)
       (-> state
           (update :doors inc)
+          (update :moves inc)
           (assoc :passengers remaining-passengers)
           (update :finished into trip-done')
           (update :score + score)
