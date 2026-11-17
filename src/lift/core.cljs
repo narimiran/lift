@@ -9,11 +9,14 @@
 (def actions
   {:game/key (fn [state k]
                (case (:screen-type state)
-                 (:intro :over) (case k
-                                  " " [[:dom/prevent-default] [:game/start]]
-                                  "h" [[:game/help]])
+                 :intro (case k
+                          " " [[:dom/prevent-default] [:game/start]]
+                          "h" [[:game/help]])
+                 :over (case k
+                         "n"  [[:dom/prevent-default] [:game/start]]
+                         "h" [[:game/help]])
                  :help (case k
-                         ("h" " ") [[:game/back]])
+                         ("h" "q" " ") [[:game/back]])
                  :game (case k
                          " " [[:game/tic [:game/doors]]]
                          ("w" "ArrowUp")   [[:game/tic [:game/move :up]]]

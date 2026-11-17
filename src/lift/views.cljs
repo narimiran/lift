@@ -1,4 +1,6 @@
-(ns lift.views)
+(ns lift.views
+  (:require
+   [lift.game :refer [wait-limit]]))
 
 (def colors
   [:slate :orange :amber :lime :emerald :cyan :blue :violet :fuchsia :rose])
@@ -19,13 +21,14 @@
 
 
 
-(defn- people-view [people & [floor]]
-  (for [{:keys [end impatient? relaxed? x]} people]
+(defn- people-view [people {:keys [floor t]}]
+  (for [{:keys [end impatient? relaxed? x created-at]} people]
     [:span.font-mono.border-1.border-black.rounded.text-xl.leading-5.bottom-0
      {:class (cond-> [(bg-color end) "px-[3px]" "mb-[2px]"]
               (= floor end) (conj :font-bold (bg-color end 400))
               impatient? (conj :animate-impatient)
-              relaxed? (conj :italic :text-gray-600))
+              relaxed? (conj :italic :text-gray-600)
+              (> (- t created-at) (- wait-limit 15)) (conj :animate-pulse))
       :style (when x
                {:position :absolute
                 :left (str x "px")})}
@@ -40,7 +43,7 @@
     :style {:bottom (str "calc(" floor " * 4rem)")}}
    [:div.flex.flex-wrap.h-full.gap-1.items-end
     {:class ["px-[1px]"]}
-    (people-view passengers floor)]])
+    (people-view passengers {:floor floor})]])
 
 (defn- waiters-positions [waiters]
   (reduce (fn [acc {:keys [created-at] :as w}]
@@ -51,7 +54,7 @@
           []
           waiters))
 
-(defn- floor-row [i waiters]
+(defn- floor-row [moves i waiters]
   [:div.flex.h-16.ml-42.mr-2.items-end
    [:div.flex.flex-1.h-16.items-end.border-b-2.border-black
     [:div.flex.gap-2.items-end
@@ -59,23 +62,23 @@
       {:class [(text-color i)]}
       i]
      [:div.flex.relative
-      (people-view waiters)]]]])
+      (people-view waiters {:t moves})]]]])
 
 
-(defn- floor-view [waiters]
+(defn- floor-view [waiters moves]
   (let [by-floor (group-by :start waiters)]
     [:div.flex.flex-col-reverse.absolute.inset-0.mb-6
      (for [i (range 10)]
-       (floor-row i (->> (get by-floor i)
-                         (sort-by :created-at)
-                         (waiters-positions))))]))
+       (floor-row moves i (->> (get by-floor i)
+                               (sort-by :created-at)
+                               (waiters-positions))))]))
 
-(defn- board-view [{:keys [floor waiters passengers message]}]
+(defn- board-view [{:keys [floor waiters passengers message moves]}]
   [:div.w-100.bg-white.border-2.border-black.rounded-lg
    [:div.relative.h-170
     [:div.absolute.inset-4.w-36.bg-gray-500.border-2.border-black.rounded-lg]
     (lift-view floor passengers message)
-    (floor-view waiters)]])
+    (floor-view waiters moves)]])
 
 (defn- stats-view [{:keys [score moves doors finished message]}]
   [:div
@@ -117,14 +120,19 @@
 
 
 
-(defn end-view [{:keys [score high-score]}]
+(defn end-view [{:keys [score high-score message]}]
   [:div.flex.flex-col.h-168.w-200.m-2.p-8.items-center.justify-center.bg-orange-100
    [:h1.text-5xl.p-16.font-black "Game over!"]
-   [:div "Current score: " score]
-   [:div.mb-8 "Your best score so far: " high-score]
+   (if (seq message)
+     (list
+      [:div "You lost."]
+      [:div.mb-8 (second message)])
+     (list
+      [:div "Current score: " score]
+      [:div.mb-8 "Your best score so far: " high-score]))
    [:button.btn.p-8.font-mono.border-1.border-black.rounded-lg.cursor-pointer
     {:on {:click [[:game/start]]}}
-    "press SPACE to play again"]])
+    "press N for a new game"]])
 
 
 (defn help-view []
@@ -135,14 +143,17 @@
         If you want to open your doors to take and drop passengers, press SPACE.
         There are different kinds of passengers:"]
    [:div.flex.gap-2
-    (people-view [{:end 3}])
+    (people-view [{:end 3}] {})
     [:span "Regular passenger. Wants to go to the 3rd floor."]]
    [:div.flex.gap-2
-    (people-view [{:end 5 :impatient? true}])
+    (people-view [{:end 5 :impatient? true}] {})
     [:span "Impatient passenger. Hates waiting and wasting time."]]
    [:div.flex.gap-2
-    (people-view [{:end 8 :relaxed? true}])
+    (people-view [{:end 8 :relaxed? true}] {})
     [:span "Relaxed passenger. Doesn't mind waiting longer."]]
+   [:div.flex.gap-2
+    (people-view [{:end 1 :created-at 0}] {:t 100})
+    [:span "Waiting for a long time. Pick it up soon (or lose the game)."]]
    [:p "If you take a passenger directly (no going in wrong direction nor opening
         the doors along the way) to their destination, you receive a bonus.
         The longer the passenger waits and travels, the lower the score.

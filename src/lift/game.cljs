@@ -2,6 +2,7 @@
 
 
 (def lift-capacity 10)
+(def wait-limit 40)
 
 
 (defn- create-waiter [t]
@@ -32,14 +33,18 @@
    :passengers []
    :finished []})
 
-(defn maybe-end [{:keys [moves score high-score] :as state}]
-  (if (> moves 100)
-    (let [record (max score high-score)]
-      (.. js/window -localStorage (setItem :lift-high-score record))
-      (-> state
-          (assoc :screen-type :over)
-          (assoc :high-score record)))
-    state))
+(defn maybe-end [{:keys [moves score high-score waiters] :as state}]
+  (cond
+    (> moves 100) (let [record (max score high-score)]
+                    (.. js/window -localStorage (setItem :lift-high-score record))
+                    (-> state
+                        (assoc :screen-type :over)
+                        (assoc :high-score record)))
+    (> (- moves (reduce min (map :created-at waiters))) wait-limit)
+    (-> state
+        (assoc :screen-type :over)
+        (assoc :message [:lose "You left some people waiting for too long."]))
+    :else state))
 
 (defn move [{:keys [floor moves] :as state} dir]
   (let [f (case dir :up inc :down dec)
