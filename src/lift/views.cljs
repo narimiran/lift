@@ -124,12 +124,13 @@
 
 (defn end-view [{:keys [score high-score message]}]
   [:div.flex.flex-col.h-168.w-200.m-2.p-8.items-center.justify-center.bg-orange-100
-   [:h1.text-5xl.p-16.font-black "Game over!"]
    (if (seq message)
      (list
+      [:h1.text-5xl.p-16.font-black "Game over!"]
       [:div "You lost."]
       [:div.mb-8 (second message)])
      (list
+      [:h1.text-5xl.p-16.font-black "You win!"]
       [:div "Current score: " score]
       [:div.mb-8 "Your best score so far: " high-score]))
    [:button.btn.p-8.font-mono.border-1.border-black.rounded-lg.cursor-pointer

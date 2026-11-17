@@ -14,6 +14,7 @@
       {:start start
        :end end
        :waiting-time 0
+       :trip-time -1
        :impatient? (> r 0.9)
        :relaxed? (< r 0.15)})))
 
@@ -67,11 +68,7 @@
       :else (assoc state :message [:wrong-floor "Can't move there."]))))
 
 
-(defn- add-passengers [passengers new-passengers]
-  (let [new-psgs (map #(assoc % :trip-time -1) new-passengers)] ; `tick` will increment it to 0
-    (into passengers new-psgs)))
-
-(defn- calc-stats [{:keys [waiting-time trip-time impatient? relaxed? start end]
+(defn- calc-score [{:keys [waiting-time trip-time impatient? relaxed? start end]
                     :as passengers}]
   (let [multi (cond
                 impatient? 1.5
@@ -91,22 +88,17 @@
         (group-by #(= floor (:start %)) waiters)
         {trip-done true, remaining-passengers false}
         (group-by #(= floor (:end %)) passengers)
-        passengers' (add-passengers remaining-passengers new-passengers)
-        trip-done' (map calc-stats trip-done)
-        move-score (reduce + (map :score trip-done'))]
-    (cond
-      (> (count passengers') lift-capacity)
+        passengers' (into remaining-passengers new-passengers)
+        trip-done' (map calc-score trip-done)
+        move-score (reduce + (map :score trip-done'))
+        full-cap? (> (count passengers') lift-capacity)]
+    (if (and (empty? new-passengers)
+             (empty? trip-done))
+      (assoc state :message [:door-close "No need to open the door."])
       (-> state
-          (assoc :passengers remaining-passengers)
+          (assoc :passengers (if full-cap? remaining-passengers passengers'))
+          (cond-> (not full-cap?) (assoc :waiters remaining-waiters))
           tick
           (update :finished into trip-done')
           (update :score + move-score)
-          (assoc :message [:full-cap "Can't take all new passengers. Taking nobody."]))
-      (and (zero? (count new-passengers)) (zero? (count trip-done)))
-      (assoc state :message [:door-close "No need to open the door."])
-      :else (-> state
-                (assoc :passengers passengers')
-                (assoc :waiters remaining-waiters)
-                tick ; needs to be after changing passengers and waiters
-                (update :finished into trip-done')
-                (update :score + move-score)))))
+          (cond-> full-cap? (assoc :message [:full-cap "Can't take all new passengers. Taking nobody."]))))))
