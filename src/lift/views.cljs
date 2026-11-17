@@ -84,19 +84,17 @@
     (lift-view floor passengers message)
     (floor-view waiters)]])
 
-(defn- stats-view [{:keys [score moves doors finished message]}]
+(defn- stats-view [{:keys [score moves finished message]}]
   [:div
    [:p "Score: " score]
    [:p "Moves: " moves]
-   [:p "Doors open: " doors]
    [:p.italic (second message)]
    [:div.mt-4
     ; debugging/experimenting:
-    (for [{:keys [waiting-time trip-time impatient? relaxed? direct? score]} finished]
+    (for [{:keys [waiting-time trip-time impatient? relaxed? score]} finished]
       [:div.flex.gap-1
        [:span "Waited: " waiting-time]
        [:span "Traveled: " trip-time]
-       (when direct? [:span "direct!"])
        (when impatient? [:span "impatient!"])
        (when relaxed? [:span "relaxed..."])
        [:span "Score: " score]])]])

@@ -27,7 +27,6 @@
    :floor 0
    :moves 0
    :score 0
-   :doors 0
    :message []
    :waiters (repeatedly 3 create-waiter)
    :passengers []
@@ -84,7 +83,6 @@
                               (* 2 multi waiting-time)
                               (* multi trip-time))))]
     (-> passengers
-        (assoc :direct? direct?) ; needed just for debugging/experimenting
         (assoc :score (cond-> score
                         direct? (* 2))))))
 
@@ -95,22 +93,20 @@
         (group-by #(= floor (:end %)) passengers)
         passengers' (add-passengers remaining-passengers new-passengers)
         trip-done' (map calc-stats trip-done)
-        score (reduce + (map :score trip-done'))]
+        move-score (reduce + (map :score trip-done'))]
     (cond
       (> (count passengers') lift-capacity)
       (-> state
-          (update :doors inc)
           (assoc :passengers remaining-passengers)
           tick
           (update :finished into trip-done')
-          (update :score + score)
+          (update :score + move-score)
           (assoc :message [:full-cap "Can't take all new passengers. Taking nobody."]))
       (and (zero? (count new-passengers)) (zero? (count trip-done)))
       (assoc state :message [:door-close "No need to open the door."])
       :else (-> state
-                (update :doors inc)
                 (assoc :passengers passengers')
                 (assoc :waiters remaining-waiters)
                 tick ; needs to be after changing passengers and waiters
                 (update :finished into trip-done')
-                (update :score + score)))))
+                (update :score + move-score)))))
