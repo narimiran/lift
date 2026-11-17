@@ -7,22 +7,22 @@
 
 
 (def actions
-  {:game/key (fn [state k]
-               (case (:screen-type state)
+  {:game/key (fn [{:keys [screen-type]} k]
+               (case screen-type
                  :intro (case k
                           " " [[:dom/prevent-default] [:game/start]]
                           "h" [[:game/help]])
                  :over (case k
-                         "n"  [[:dom/prevent-default] [:game/start]]
+                         "n" [[:game/start]]
                          "h" [[:game/help]])
                  :help (case k
-                         ("h" "q" " ") [[:game/back]])
+                         ("h" "q" " ") [[:dom/prevent-default] [:game/back]])
                  :game (case k
                          " " [[:game/tic [:game/doors]]]
                          ("w" "ArrowUp")   [[:game/tic [:game/move :up]]]
                          ("s" "ArrowDown") [[:game/tic [:game/move :down]]]
                          "h" [[:game/help]]
-                         "q" [[:dom/prevent-default] [:game/quit]])))
+                         "q" [[:game/quit]])))
    :game/tic   (fn [_ action] [[:dom/prevent-default] action [:game/over?]])
    :game/start (fn [_] [[:store/reset (game/reset-state :game)]])
    :game/quit  (fn [_] [[:store/reset (game/reset-state :intro)]])
