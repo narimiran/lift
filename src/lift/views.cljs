@@ -20,12 +20,15 @@
 
 
 (defn- people-view [people & [floor]]
-  (for [{:keys [end impatient? relaxed?]} people]
-    [:span.font-mono.border-1.border-black.rounded.text-xl.leading-5
+  (for [{:keys [end impatient? relaxed? x]} people]
+    [:span.font-mono.border-1.border-black.rounded.text-xl.leading-5.bottom-0
      {:class (cond-> [(bg-color end) "px-[3px]" "mb-[2px]"]
               (= floor end) (conj :font-bold (bg-color end 400))
               impatient? (conj :animate-impatient)
-              relaxed? (conj :italic :text-gray-600))}
+              relaxed? (conj :italic :text-gray-600))
+      :style (when x
+               {:position :absolute
+                :left (str x "px")})}
      end]))
 
 (defn- lift-view [floor passengers message]
@@ -39,15 +42,23 @@
     {:class ["px-[1px]"]}
     (people-view passengers floor)]])
 
+(defn- waiters-positions [waiters]
+  (reduce (fn [acc {:keys [created-at] :as w}]
+            (if-let [prev-x (:x (peek acc))]
+              (let [d (- created-at (:created-at (peek acc)))]
+                (conj acc (assoc w :x (+ prev-x d 20))))
+              (conj acc (assoc w :x 0))))
+          []
+          waiters))
 
 (defn- floor-row [i waiters]
   [:div.flex.h-16.ml-42.mr-2.items-end
    [:div.flex.flex-1.h-16.items-end.border-b-2.border-black
-    [:div.flex.gap-3.items-end
-     [:div.text-3xl.font-bold.px-2
+    [:div.flex.gap-2.items-end
+     [:div.text-3xl.font-bold.px-1
       {:class [(text-color i)]}
       i]
-     [:div.flex.gap-1
+     [:div.flex.relative
       (people-view waiters)]]]])
 
 
@@ -55,7 +66,9 @@
   (let [by-floor (group-by :start waiters)]
     [:div.flex.flex-col-reverse.absolute.inset-0.mb-6
      (for [i (range 10)]
-       (floor-row i (get by-floor i)))]))
+       (floor-row i (->> (get by-floor i)
+                         (sort-by :created-at)
+                         (waiters-positions))))]))
 
 (defn- board-view [{:keys [floor waiters passengers message]}]
   [:div.w-100.bg-white.border-2.border-black.rounded-lg
