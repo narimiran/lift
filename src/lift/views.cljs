@@ -91,20 +91,11 @@
 
 
 
-(defn- stats-view [{:keys [score moves finished message]}]
+(defn- stats-view [{:keys [score moves message]}]
   [:div
    [:p "Score: " score]
    [:p "Moves: " moves]
-   [:p.italic (second message)]
-   [:div.mt-4
-    ; debugging/experimenting:
-    (for [{:keys [waiting-time trip-time impatient? relaxed? score]} finished]
-      [:div.flex.gap-1
-       [:span "Waited: " waiting-time]
-       [:span "Traveled: " trip-time]
-       (when impatient? [:span "impatient!"])
-       (when relaxed? [:span "relaxed..."])
-       [:span "Score: " score]])]])
+   [:p.italic (second message)]])
 
 
 
