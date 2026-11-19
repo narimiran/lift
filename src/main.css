@@ -30,7 +30,7 @@
   --animate-pulse: pulse 2.5s ease-in-out infinite;
   @keyframes pulse {
       0%, 100% { scale: 1;    opacity: 1; }
-      50%      { scale: 0.70; opacity: 0.5; }
+      50%      { scale: 0.80; opacity: 0.5; }
   }
 
   --animate-float-up: float-up 2s ease-out forwards;

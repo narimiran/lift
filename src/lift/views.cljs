@@ -25,19 +25,26 @@
 (defn- text-color [c & [h]]
   (color "text-" c (or h 400)))
 
-(defn- people-view [people {:keys [floor]}]
+(defn- people-view [people {:keys [floor help-view?]}]
   (for [{:keys [end impatient? relaxed? x waiting-time max-wait]} people]
-    [:span.font-mono.border-1.border-black.rounded.text-xl.leading-4.bottom-0
-     {:class (cond-> [(bg-color end) "px-[3px]" "mb-[1px]" "pt-[2px]"]
-              (= floor end) (conj :font-bold (bg-color end 400))
-              impatient? (conj :animate-impatient)
-              relaxed? (conj :italic :text-slate-600)
-              (and (nil? floor)
-                   (> waiting-time (- max-wait 15))) (conj :animate-pulse))
-      :style (when x
-               {:position :absolute
-                :left (str x "px")})}
-     end]))
+    (let [waiter? (nil? floor)
+          time-remaining (- max-wait waiting-time)
+          short-time? (and waiter? (< time-remaining 15))]
+      [:div.flex.flex-col.items-end
+       {:style (when (and (not help-view?) waiter?)
+                 {:position :absolute
+                  :left (str x "px")
+                  :bottom "0px"})}
+       (when short-time?
+         [:span.flex.font-mono.text-xs.leading-2.italic time-remaining])
+       [:span.font-mono.border-1.border-black.rounded.text-xl.leading-4.bottom-0
+        {:class (cond-> [(bg-color end) "px-[3px]" "mb-[1px]" "pt-[2px]"]
+                  (= floor end) (conj :font-bold (bg-color end 400))
+                  impatient? (conj :animate-impatient)
+                  relaxed? (conj :italic :text-slate-600)
+                  short-time? (conj :animate-pulse))}
+        end]])))
+
 
 (defn- lift-view [floor passengers message finished]
   [:div.absolute.w-32.h-14.ml-4.mb-3.bg-white.border-4.border-black.rounded-lg.transition-all.duration-400
@@ -150,7 +157,7 @@
 
 (defn- psgs [p m]
   [:div.flex.gap-2.items-center
-    (people-view [p] {})
+    (people-view [p] {:help-view? true})
     [:span m]])
 
 (defn- help-view []
@@ -160,10 +167,10 @@
         You have a limited space for 10 persons at time.
         If you want to open your doors to take and drop passengers, press SPACE.
         There are different kinds of passengers:"]
-   (psgs {:end 3}  "Regular passenger. Wants to go to the 3rd floor.")
-   (psgs {:end 5 :impatient? true} "Impatient passenger. Hates waiting and wasting time.")
-   (psgs {:end 8 :relaxed? true} "Relaxed passenger. Doesn't mind waiting longer.")
-   (psgs {:end 1 :waiting-time 100} "Waiting for a long time. Pick it up soon (or lose the game). Once in the lift, you're safe.")
+   (psgs {:end 3 :max-wait 100}  "Regular passenger. Wants to go to the 3rd floor.")
+   (psgs {:end 5 :max-wait 100 :impatient? true} "Impatient passenger. Hates waiting and wasting time.")
+   (psgs {:end 8 :max-wait 100 :relaxed? true} "Relaxed passenger. Doesn't mind waiting longer.")
+   (psgs {:end 1 :waiting-time 30 :max-wait 39} "Waiting for a long time. Pick it up soon (here you have 9 more moves or you'll lose the game). Once in the lift, you're safe.")
    [:p "If you take a passenger directly (no going in wrong direction nor opening
         the doors along the way) to their destination, you receive a bonus.
         The longer the passenger waits and travels, the lower the score.
