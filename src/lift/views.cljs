@@ -29,7 +29,8 @@
   (for [{:keys [end impatient? relaxed? x waiting-time max-wait]} people]
     (let [waiter? (nil? floor)
           time-remaining (- max-wait waiting-time)
-          short-time? (and waiter? (< time-remaining 15))]
+          short-time? (and waiter? (< time-remaining 15))
+          urgent? (and waiter? (< time-remaining 4))]
       [:div.flex.flex-col.items-end
        {:style (when (and (not help-view?) waiter?)
                  {:position :absolute
@@ -42,7 +43,8 @@
                   (= floor end) (conj :font-bold (bg-color end 400))
                   impatient? (conj :animate-impatient)
                   relaxed? (conj :italic :text-slate-600)
-                  short-time? (conj :animate-pulse))}
+                  short-time? (conj :animate-pulse)
+                  urgent? (conj :animate-urgent))}
         end]])))
 
 
