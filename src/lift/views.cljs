@@ -41,16 +41,21 @@
                 :left (str x "px")})}
      end]))
 
-(defn- lift-view [floor passengers message]
+(defn- lift-view [floor passengers message finished]
   [:div.absolute.w-32.h-14.ml-4.mb-3.bg-white.border-4.border-black.rounded-lg.transition-all.duration-400
    {:class (case (first message)
              (:full-cap :door-close) [:animate-shake]
              :wrong-floor [:animate-bounce]
              nil)
-    :style {:bottom (str "calc(" floor " * 56px)")}}
+    :style {:bottom (str "calc(" (* 56 floor) "px)")}}
    [:div.flex.flex-wrap.h-full.gap-1.items-end
     {:class ["px-[1px]"]}
-    (people-view passengers {:floor floor})]])
+    (people-view passengers {:floor floor})]
+   (for [[i {:keys [score]}] (map-indexed vector finished)]
+     [:span.absolute.-top-6.font-mono.font-bold.animate-float-up
+      {:class [(text-color floor)]
+       :style {:left (str "calc(5% + " (* 40 i) "px)")}}
+      (str "+" score)])])
 
 (defn- waiters-positions [waiters]
   (reduce (fn [acc {:keys [waiting-time] :as w}]
@@ -68,7 +73,7 @@
   [:div.flex.h-14.ml-42.mr-2.items-end
    [:div.flex.flex-1.h-14.items-end.border-b-2.border-black
     [:div.flex.gap-2.items-end
-     [:div.text-3xl.font-bold.px-1
+     [:div.text-3xl.font-mono.font-bold.px-1
       {:class [(text-color i)]}
       i]
      [:div.flex.relative
@@ -82,11 +87,11 @@
                          (sort-by :waiting-time)
                          (waiters-positions))))]))
 
-(defn- board-view [{:keys [floor waiters passengers message]}]
+(defn- board-view [{:keys [floor waiters passengers message finished]}]
   [:div.w-full.max-w-128.bg-white.border-2.border-black.rounded-lg
    [:div.relative.h-146
     [:div.absolute.inset-2.w-36.bg-slate-500.border-2.border-black.rounded-lg]
-    (lift-view floor passengers message)
+    (lift-view floor passengers message finished)
     (floor-view waiters)]])
 
 
@@ -100,7 +105,7 @@
 
 
 (defn- button [text on-click]
-  [:button.touch-manipulation.cursor-pointer.flex.flex-wrap.h-14.bg-white.hover:bg-slate-300.px-4.border-4.border-black.rounded-lg.font-bold.text-3xl.content-center
+  [:button.touch-manipulation.cursor-pointer.flex.flex-wrap.h-14.bg-white.hover:bg-slate-300.px-4.border-4.border-black.rounded-lg.font-mono.font-bold.text-3xl.content-center
    {:on {:click on-click}}
    text])
 
@@ -160,7 +165,7 @@
    (psgs {:end 3}  "Regular passenger. Wants to go to the 3rd floor.")
    (psgs {:end 5 :impatient? true} "Impatient passenger. Hates waiting and wasting time.")
    (psgs {:end 8 :relaxed? true} "Relaxed passenger. Doesn't mind waiting longer.")
-   (psgs {:end 1 :waiting-time 100} "Waiting for a long time. Pick it up soon (or lose the game).")
+   (psgs {:end 1 :waiting-time 100} "Waiting for a long time. Pick it up soon (or lose the game). Once in the lift, you're safe.")
    [:p "If you take a passenger directly (no going in wrong direction nor opening
         the doors along the way) to their destination, you receive a bonus.
         The longer the passenger waits and travels, the lower the score.

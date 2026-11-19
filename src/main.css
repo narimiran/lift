@@ -4,7 +4,6 @@
 
 @theme {
   --animate-shake: shake 0.4s ease-in-out;
-
   @keyframes shake {
     0%, 100% { transform: translateX(0); }
     20%      { transform: translateX(-8px); }
@@ -13,9 +12,7 @@
     80%      { transform: translateX(4px); }
   }
 
-
   --animate-bounce: bounce 0.4s ease-in-out;
-
   @keyframes bounce {
     0%, 100% { transform: translateY(0); }
     20%      { transform: translateY(-6px); }
@@ -24,19 +21,22 @@
     80%      { transform: translateY(3px); }
   }
 
-
   --animate-impatient: impatient 0.12s infinite alternate;
-
   @keyframes impatient {
     from { transform: translateY(0); }
-    to { transform: translateY(-3px); }
+    to   { transform: translateY(-3px); }
   }
 
   --animate-pulse: pulse 1s ease-in-out infinite;
-
   @keyframes pulse {
       0%, 100% { scale: 1; }
       50% { scale: 0.80; }
+  }
+
+  --animate-float-up: float-up 2s ease-out forwards;
+  @keyframes float-up {
+      from { transform: translateY(0);     opacity: 1; }
+      to   { transform: translateY(-42px); opacity: 0; }
   }
 
   /* --animate-relaxed: relaxed 2s ease-in-out infinite; */

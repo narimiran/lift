@@ -53,6 +53,7 @@
   (-> state
       (update :moves inc)
       (dissoc :message)
+      (dissoc :finished)
       (increase-time :waiters :waiting-time)
       (increase-time :passengers :trip-time)
       maybe-end))
@@ -99,5 +100,5 @@
           (cond-> (not full-cap?) (assoc :waiters remaining-waiters))
           (update :score + move-score)
           tick
-          (update :finished into trip-done')
+          (assoc :finished trip-done')
           (cond-> full-cap? (assoc :message [:full-cap "Can't take all new passengers. Taking nobody."]))))))
