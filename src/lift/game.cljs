@@ -24,9 +24,14 @@
        :impatient? impatient?
        :relaxed? relaxed?})))
 
-(defn- maybe-create-waiter [waiters]
-  (cond-> waiters
-    (< (rand) 0.5) (conj (create-waiter))))
+(defn- maybe-create-waiter [waiters moves]
+  (let [h (quot moves 40)]
+    (reduce (fn [w _]
+              (cond-> w
+                (< (rand) 0.25) (conj (create-waiter))))
+            (cond-> waiters
+              (< (rand) 0.5) (conj (create-waiter)))
+            (range h))))
 
 (defn reset-state [screen-type]
   {:screen-type (or screen-type :intro)
@@ -39,19 +44,16 @@
    :passengers []
    :finished []})
 
-(defn maybe-end [{:keys [moves score high-score waiters] :as state}]
-  (cond
-    (>= moves 100) (let [record (max score high-score)]
-                     (.. js/window -localStorage (setItem :lift-high-score record))
-                     (-> state
-                         (assoc :screen-type :over)
-                         (assoc :high-score record)))
-    (some (fn [{:keys [waiting-time max-wait]}]
-            (>= waiting-time max-wait))
-          waiters) (-> state
-                       (assoc :screen-type :over)
-                       (assoc :message [:lose "You left some people waiting for too long."]))
-    :else state))
+(defn maybe-end [{:keys [score high-score waiters] :as state}]
+  (if (some (fn [{:keys [waiting-time max-wait]}]
+              (>= waiting-time max-wait))
+            waiters)
+    (let [record (max score high-score)]
+      (.. js/window -localStorage (setItem :lift-high-score record))
+      (-> state
+          (assoc :screen-type :over)
+          (assoc :high-score record)))
+    state))
 
 (defn- increase-time [state people field]
   (assoc state people (mapv #(update % field inc) (people state))))
@@ -65,14 +67,14 @@
       (increase-time :passengers :trip-time)
       maybe-end))
 
-(defn move [{:keys [floor] :as state} dir]
+(defn move [{:keys [floor moves] :as state} dir]
   (let [f (case dir :up inc :down dec)
         floor' (f floor)]
     (cond
       (<= 0 floor' 9) (-> state
                           tick
                           (assoc :floor floor')
-                          (update :waiters maybe-create-waiter))
+                          (update :waiters maybe-create-waiter moves))
       :else (assoc state :message [:wrong-floor "Can't move there."]))))
 
 
@@ -106,6 +108,6 @@
           (assoc :passengers (if full-cap? remaining-passengers passengers'))
           (cond-> (not full-cap?) (assoc :waiters remaining-waiters))
           (update :score + move-score)
-          tick
+          (cond-> (and (not full-cap?) (seq trip-done)) tick)
           (assoc :finished trip-done')
           (cond-> full-cap? (assoc :message [:full-cap "Can't take all new passengers. Taking nobody."]))))))

@@ -29,8 +29,8 @@
   (for [{:keys [end impatient? relaxed? x waiting-time max-wait]} people]
     (let [waiter? (nil? floor)
           time-remaining (- max-wait waiting-time)
-          short-time? (and waiter? (< time-remaining 15))
-          urgent? (and waiter? (< time-remaining 4))]
+          short-time? (and waiter? (<= time-remaining 15))
+          urgent? (and waiter? (<= time-remaining 3))]
       [:div.flex.flex-col.items-end
        {:style (when (and (not help-view?) waiter?)
                  {:position :absolute
@@ -40,10 +40,10 @@
          [:span.flex.font-mono.text-xs.leading-2.italic time-remaining])
        [:span.font-mono.border-1.border-black.rounded.text-xl.leading-4.bottom-0
         {:class (cond-> [(bg-color end) "px-[3px]" "mb-[1px]" "pt-[2px]"]
-                  (= floor end) (conj :font-bold (bg-color end 400))
+                  (= floor end) (conj :font-black (bg-color end 400))
                   impatient? (conj :animate-impatient)
                   relaxed? (conj :italic :text-slate-600)
-                  short-time? (conj :animate-pulse)
+                  ;; short-time? (conj :animate-pulse)
                   urgent? (conj :animate-urgent))}
         end]])))
 
@@ -80,7 +80,7 @@
   [:div.flex.h-14.ml-42.mr-2.items-end
    [:div.flex.flex-1.h-14.items-end.border-b-2.border-black
     [:div.flex.gap-2.items-end
-     [:div.text-3xl.font-mono.font-bold.px-1
+     [:div.text-3xl.font-mono.font-black.px-1
       {:class [(text-color i)]}
       i]
      [:div.flex.relative
@@ -136,23 +136,14 @@
 
 
 
-(defn- end-msgs [title l1 l2]
-  [:div.gap-8
-   [:h1.text-5xl.py-8.justify-self-center.font-black title]
-   [:div l1]
-   [:div.mb-8 l2]])
-
-(defn- end-view [{:keys [score high-score message]}]
+(defn- end-view [{:keys [score moves high-score]}]
   [:div.flex.flex-col.w-full.max-w-128.p-8.gap-8.justify-center.bg-orange-100.mx-auto
-   (if (seq message)
-     (end-msgs "Game over!" "You lost." (second message))
-     (end-msgs "You win!"
-               (list "Current score: " score)
-               (list "Your best score so far: " high-score)))
+   [:h1.text-5xl.py-8.justify-self-center.font-mono.font-black "Game over"]
+   [:span.font-mono "Current score: " score " (" moves " moves)."]
+   [:span.font-mono.mb-8  "Your best score so far: " high-score]
    [:button.p-8.font-mono.border-1.border-black.rounded-lg.cursor-pointer
     {:on {:click [[:game/start]]}}
     "press N for a new game"]])
-
 
 
 
@@ -177,8 +168,8 @@
         the doors along the way) to their destination, you receive a bonus.
         The longer the passenger waits and travels, the lower the score.
         The longer the distance between the starting and ending floor, the higher the score."]
-   [:p "The game ends after 100 moves. Opening the doors also counts as a move.
-        Time doesn't matter, just moves. Take your time."]
+   [:p "The game ends when a passenger waits for too long. Opening the doors also counts as a move."]
+   [:p "Time doesn't matter, just moves. Take your time, choose passengers and your paths carefuly."]
    (button "↶" [[:game/back]])])
 
 
