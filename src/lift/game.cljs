@@ -76,12 +76,11 @@
                 :else 1)
         dist (abs (- end start))
         direct? (= trip-time dist)
-        score (max 0 (long (- (+ 80 (* dist dist))
-                              (* 2 multi waiting-time)
-                              (* multi trip-time))))]
-    (-> passengers
-        (assoc :score (cond-> score
-                        direct? (* 2))))))
+        score (max 10 (long (* (if direct? 2 1)
+                               (- (+ 80 (* dist dist))
+                                  (* 2 multi waiting-time)
+                                  (* multi trip-time)))))]
+    (assoc passengers :score score)))
 
 (defn open-doors [{:keys [floor waiters passengers] :as state}]
   (let [{new-passengers true, remaining-waiters false}
