@@ -1,6 +1,4 @@
-(ns lift.views
-  (:require
-   [lift.game :refer [wait-limit]]))
+(ns lift.views)
 
 
 (defn- intro-view []
@@ -28,14 +26,14 @@
   (color "text-" c (or h 400)))
 
 (defn- people-view [people {:keys [floor]}]
-  (for [{:keys [end impatient? relaxed? x waiting-time]} people]
+  (for [{:keys [end impatient? relaxed? x waiting-time max-wait]} people]
     [:span.font-mono.border-1.border-black.rounded.text-xl.leading-4.bottom-0
      {:class (cond-> [(bg-color end) "px-[3px]" "mb-[1px]" "pt-[2px]"]
               (= floor end) (conj :font-bold (bg-color end 400))
               impatient? (conj :animate-impatient)
               relaxed? (conj :italic :text-slate-600)
               (and (nil? floor)
-                   (> waiting-time (- wait-limit 15))) (conj :animate-pulse))
+                   (> waiting-time (- max-wait 15))) (conj :animate-pulse))
       :style (when x
                {:position :absolute
                 :left (str x "px")})}

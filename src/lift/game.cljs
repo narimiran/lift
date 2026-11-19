@@ -8,15 +8,21 @@
 (defn- create-waiter []
   (let [start (rand-int 10)
         end (rand-int 10)
-        r (rand)]
+        r (rand)
+        impatient? (> r 0.9)
+        relaxed? (< r 0.15)]
     (if (= start end)
       (create-waiter)
       {:start start
        :end end
        :waiting-time 0
+       :max-wait (cond
+                   impatient? (long (* 0.9 wait-limit))
+                   relaxed? (long (* 1.25 wait-limit))
+                   :else wait-limit)
        :trip-time -1
-       :impatient? (> r 0.9)
-       :relaxed? (< r 0.15)})))
+       :impatient? impatient?
+       :relaxed? relaxed?})))
 
 (defn- maybe-create-waiter [waiters]
   (cond-> waiters
@@ -40,10 +46,11 @@
                      (-> state
                          (assoc :screen-type :over)
                          (assoc :high-score record)))
-    (>= (reduce max (map :waiting-time waiters)) wait-limit)
-    (-> state
-        (assoc :screen-type :over)
-        (assoc :message [:lose "You left some people waiting for too long."]))
+    (some (fn [{:keys [waiting-time max-wait]}]
+            (>= waiting-time max-wait))
+          waiters) (-> state
+                       (assoc :screen-type :over)
+                       (assoc :message [:lose "You left some people waiting for too long."]))
     :else state))
 
 (defn- increase-time [state people field]
