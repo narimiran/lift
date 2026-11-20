@@ -49,14 +49,14 @@
 
 
 (defn- lift-view [floor passengers message finished]
-  [:div.absolute.w-32.h-14.ml-4.mb-3.bg-white.border-4.border-black.rounded-lg.transition-all.duration-400
+  [:div.absolute.w-30.h-13.ml-2.mb-3.bg-white.border-4.border-black.rounded-lg.transition-all.duration-400
    {:class (case (first message)
              (:full-cap :door-close) [:animate-shake]
              :wrong-floor [:animate-bounce]
              nil)
-    :style {:bottom (str "calc(" (* 56 floor) "px)")}}
-   [:div.flex.flex-wrap.h-full.gap-1.items-end
-    {:class ["px-[1px]"]}
+    :style {:bottom (str "calc(" (* 52 floor) "px)")}}
+   [:div.flex.flex-wrap.h-full.items-end
+    {:class ["pl-[2px]" "pt-[1px]" "gap-[2px]"]}
     (people-view passengers {:floor floor})]
    (for [[i {:keys [score]}] (map-indexed vector finished)]
      [:span.absolute.-top-6.font-mono.font-bold.animate-float-up
@@ -77,10 +77,10 @@
           waiters))
 
 (defn- floor-row [i waiters]
-  [:div.flex.h-14.ml-42.mr-2.items-end
+  [:div.flex.h-13.ml-34.mr-2.items-end
    [:div.flex.flex-1.h-14.items-end.border-b-2.border-black
     [:div.flex.gap-2.items-end
-     [:div.text-3xl.font-mono.font-black.px-1
+     [:div.text-3xl.font-mono.font-black.leading-6
       {:class [(text-color i)]}
       i]
      [:div.flex.relative
@@ -95,9 +95,9 @@
                          (waiters-positions))))]))
 
 (defn- board-view [{:keys [floor waiters passengers message finished]}]
-  [:div.w-full.max-w-128.bg-white.border-2.border-black.rounded-lg
-   [:div.relative.h-146
-    [:div.absolute.inset-2.w-36.bg-slate-500.border-2.border-black.rounded-lg]
+  [:div.w-full.max-w-128.bg-white.border-1.border-black.rounded-lg
+   [:div.relative.h-136
+    [:div.absolute.inset-1.w-32.bg-slate-500.border-2.border-black.rounded-lg]
     (lift-view floor passengers message finished)
     (floor-view waiters)]])
 
@@ -112,26 +112,29 @@
 
 
 (defn- button [text on-click]
-  [:button.touch-manipulation.cursor-pointer.flex.flex-wrap.h-14.bg-white.hover:bg-slate-300.px-4.border-4.border-black.rounded-lg.font-mono.font-bold.text-3xl.content-center
+  [:button.touch-manipulation.cursor-pointer.flex.flex-wrap.h-12.aspect-square.bg-white.hover:bg-slate-300.px-3.border-3.border-black.rounded-lg.font-mono.justify-center.text-2xl.content-center
    {:on {:click on-click}}
    text])
 
 (defn- button-view []
   [:div.flex.w-full.justify-between
-   [:div.flex.gap-3
+   [:div.flex.gap-2
     (button "↑︎" [[:game/move :up]])
     (button "↓" [[:game/move :down]])]
-   [:div.flex.gap-3
-    (button "H" [[:game/screen :help]])
+   [:div.flex.gap-2
     (button "⇄" [[:game/doors]])]])
 
 
 (defn- game-view [state]
-  [:div.flex.flex-col.w-full.max-w-128.bg-slate-300.p-2.gap-2.items-start.mx-auto
+  [:div.flex.flex-col.w-full.max-w-128.bg-slate-300.p-1.gap-1.items-start.mx-auto
    (board-view state)
    (button-view)
-   (stats-view state)])
-
+   [:div.flex.w-full.justify-between
+    (stats-view state)
+    [:div.flex.gap-2
+     (button "C" [[:game/clean-floor]])
+     (button "L" [[:game/random-lift]])
+     (button "H" [[:game/screen :help]])]]])
 
 
 
