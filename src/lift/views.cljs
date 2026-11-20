@@ -110,19 +110,36 @@
    [:p.italic (second message)]])
 
 
+(def icons
+  {:up    "M6 15l6-6 6 6"
+   :down  "M6 9l6 6 6-6"
+   :doors "M9 7l-5 5 5 5M15 7l5 5-5 5"})
+
+(defn icon [kind]
+  [:svg {:viewBox "0 0 24 24"
+         :width "48"
+         :height "48"
+         :fill "none"
+         :stroke "currentColor"
+         :stroke-width "2"
+         :stroke-linecap "round"
+         :stroke-linejoin "round"}
+   [:path {:d (icons kind)}]])
 
 (defn- button [text on-click]
-  [:button.touch-manipulation.cursor-pointer.flex.flex-wrap.h-12.aspect-square.bg-white.hover:bg-slate-300.px-3.border-3.border-black.rounded-lg.font-mono.justify-center.text-2xl.content-center
+  [:button.touch-manipulation.cursor-pointer.flex.flex-wrap.h-12.aspect-square.bg-white.hover:bg-slate-300.border-2.border-black.rounded-lg.font-mono.justify-center.text-2xl.content-center
    {:on {:click on-click}}
-   text])
+   (if (= (type text) Keyword)
+     (icon text)
+     text)])
 
 (defn- button-view []
   [:div.flex.w-full.justify-between
    [:div.flex.gap-2
-    (button "↑︎" [[:game/move :up]])
-    (button "↓" [[:game/move :down]])]
+    (button :up [[:game/move :up]])
+    (button :down [[:game/move :down]])]
    [:div.flex.gap-2
-    (button "⇄" [[:game/doors]])]])
+    (button :doors [[:game/doors]])]])
 
 
 (defn- game-view [state]
@@ -138,9 +155,8 @@
 
 
 
-
 (defn- end-view [{:keys [score moves high-score]}]
-  [:div.flex.flex-col.w-full.max-w-128.p-8.gap-8.justify-center.bg-orange-100.mx-auto
+  [:div.flex.flex-col.w-full.max-w-128.p-4.gap-8.justify-center.bg-orange-100.mx-auto
    [:h1.text-5xl.py-8.justify-self-center.font-mono.font-black "Game over"]
    [:span.font-mono "Current score: " score " (" moves " moves)."]
    [:span.font-mono.mb-8  "Your best score so far: " high-score]
