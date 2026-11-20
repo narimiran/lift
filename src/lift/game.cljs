@@ -2,7 +2,7 @@
 
 
 (def lift-capacity 10)
-(def wait-limit 40)
+(def wait-limit 50)
 
 
 (defn- create-waiter []
@@ -17,8 +17,8 @@
        :end end
        :waiting-time 0
        :max-wait (cond
-                   impatient? (long (* 0.9 wait-limit))
-                   relaxed? (long (* 1.25 wait-limit))
+                   impatient? (long (* 0.84 wait-limit))
+                   relaxed? (long (* 1.2 wait-limit))
                    :else wait-limit)
        :trip-time -1
        :impatient? impatient?

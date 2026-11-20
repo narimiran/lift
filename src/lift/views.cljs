@@ -29,8 +29,8 @@
   (for [{:keys [end impatient? relaxed? x waiting-time max-wait]} people]
     (let [waiter? (nil? floor)
           time-remaining (- max-wait waiting-time)
-          short-time? (and waiter? (<= time-remaining 15))
-          urgent? (and waiter? (<= time-remaining 3))]
+          short-time? (and waiter? (<= time-remaining 20))
+          urgent? (and waiter? (<= time-remaining 5))]
       [:div.flex.flex-col.items-end
        {:style (when (and (not help-view?) waiter?)
                  {:position :absolute
