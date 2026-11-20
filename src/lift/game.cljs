@@ -108,6 +108,6 @@
           (assoc :passengers (if full-cap? remaining-passengers passengers'))
           (cond-> (not full-cap?) (assoc :waiters remaining-waiters))
           (update :score + move-score)
-          (cond-> (and (not full-cap?) (seq trip-done)) tick)
+          (cond-> (or (not full-cap?) (seq trip-done)) tick)
           (assoc :finished trip-done')
           (cond-> full-cap? (assoc :message [:full-cap "Can't take all new passengers. Taking nobody."]))))))
