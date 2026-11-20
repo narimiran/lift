@@ -35,12 +35,13 @@
 
 (defn reset-state [screen-type]
   {:screen-type (or screen-type :intro)
-   :high-score (or (.. js/window -localStorage (getItem :lift-high-score)) 0)
+   :high-score (or (long (.. js/window -localStorage (getItem :lift-high-score))) 0)
    :floor 0
    :moves 0
    :score 0
    :message []
    :waiters (repeatedly 3 create-waiter)
+   :specials {:clean-floor 0}
    :passengers []
    :finished []})
 
@@ -111,3 +112,43 @@
           (cond-> (or (not full-cap?) (seq trip-done)) tick)
           (assoc :finished trip-done')
           (cond-> full-cap? (assoc :message [:full-cap "Can't take all new passengers. Taking nobody."]))))))
+
+
+
+(def special-freq
+  {:clean-floor 100
+   :random-lift 60})
+
+(defn- available-special? [special-name special-value moves]
+  (< special-value (quot moves (special-freq special-name))))
+
+
+(defn clean-longest-floor [{:keys [waiters specials moves] :as state}]
+  (if (available-special? :clean-floor (:clean-floor specials) moves)
+    (let [longest (->> waiters
+                       (group-by :start)
+                       (apply max-key (comp count val))
+                       first)]
+      (-> state
+          (update-in [:specials :clean-floor] inc)
+          (assoc :waiters (remove (fn [{:keys [start]}]
+                                    (= longest start))
+                                  waiters))))
+    (assoc state :message [:no-clean
+                           (str "You're not alowed to remove people from the bussiest floor. "
+                                "You need to wait for additional "
+                                (mod (- moves) (special-freq :clean-floor))
+                                " moves before it is available.")])))
+
+
+(defn random-lift [{:keys [passengers specials moves] :as state}]
+  (if (available-special? :random-lift (:random-lift specials) moves)
+    (let [new-destination (rand-int 10)]
+      (-> state
+          (update-in [:specials :random-lift] inc)
+          (assoc :passengers (map #(assoc % :end new-destination) passengers))))
+    (assoc state :message [:no-lift
+                           (str "You're not alowed to change passengers' destination. "
+                                "You need to wait for additional "
+                                (mod (- moves) (special-freq :random-lift))
+                                " moves before it is available.")])))

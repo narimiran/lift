@@ -122,7 +122,7 @@
     (button "↑︎" [[:game/move :up]])
     (button "↓" [[:game/move :down]])]
    [:div.flex.gap-3
-    (button "H" [[:game/help]])
+    (button "H" [[:game/screen :help]])
     (button "⇄" [[:game/doors]])]])
 
 
@@ -170,7 +170,16 @@
         The longer the distance between the starting and ending floor, the higher the score."]
    [:p "The game ends when a passenger waits for too long. Opening the doors also counts as a move."]
    [:p "Time doesn't matter, just moves. Take your time, choose passengers and your paths carefuly."]
-   (button "↶" [[:game/back]])])
+
+   [:h2.text-xl.font-bold.mt-4 "Specials"]
+   [:div.flex.gap-2
+    [:h3.font-bold "Clean floor (C)"]
+    [:p "Remove all passengers from the bussiest floor. Available every 100 moves."]]
+   [:div.flex.gap-2
+    [:h3.font-bold "Random destination (L)"]
+    [:p "All lift passengers go to the same random destination. Available every 60 moves."]]
+
+   [:div.mt-4 (button "↶" [[:game/back]])]])
 
 
 
