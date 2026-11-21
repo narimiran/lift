@@ -25,27 +25,22 @@
 (defn- text-color [c & [h]]
   (color "text-" c (or h 400)))
 
-(defn- people-view [people {:keys [floor help-view?]}]
-  (for [{:keys [end impatient? relaxed? x waiting-time max-wait]} people]
+(defn- people-view [people {:keys [floor]}]
+  (for [{:keys [end impatient? relaxed? waiting-time max-wait]} people]
     (let [waiter? (nil? floor)
           time-remaining (- max-wait waiting-time)
           short-time? (and waiter? (<= time-remaining 20))
           urgent? (and waiter? (<= time-remaining 5))]
-      [:div.flex.flex-col.items-end
-       {:style (when (and (not help-view?) waiter?)
-                 {:position :absolute
-                  :left (str x "px")
-                  :bottom "0px"})}
-       (when short-time?
-         [:span.flex.font-mono.text-xs.leading-2.italic time-remaining])
+      [:div.flex.flex-col-reverse.items-end
        [:span.font-mono.border-1.border-black.rounded.text-xl.leading-4.bottom-0
         {:class (cond-> [(bg-color end) "px-[3px]" "mb-[1px]" "pt-[2px]"]
                   (= floor end) (conj :font-black (bg-color end 400))
                   impatient? (conj :animate-impatient)
                   relaxed? (conj :italic :text-slate-600)
-                  ;; short-time? (conj :animate-pulse)
                   urgent? (conj :animate-urgent))}
-        end]])))
+        end]
+       (when short-time?
+         [:span.flex.font-mono.text-xs.leading-2.italic time-remaining])])))
 
 
 (defn- lift-view [floor passengers message finished]
@@ -64,18 +59,6 @@
        :style {:left (str "calc(5% + " (* 40 i) "px)")}}
       (str "+" score)])])
 
-(defn- waiters-positions [waiters]
-  (reduce (fn [acc {:keys [waiting-time] :as w}]
-            (if-let [prev-x (:x (peek acc))]
-              (let [d (- waiting-time (:waiting-time (peek acc)))]
-                (conj acc (assoc w :x
-                                 #_(+ prev-x (max waiting-time 20))
-                                 #_(max waiting-time (+ prev-x 20))
-                                 (+ prev-x d 22))))
-              (conj acc (assoc w :x waiting-time))))
-          []
-          waiters))
-
 (defn- floor-row [i waiters]
   [:div.flex.h-13.ml-34.mr-2.items-end
    [:div.flex.flex-1.h-14.items-end.border-b-2.border-black
@@ -83,7 +66,7 @@
      [:div.text-3xl.font-mono.font-black.leading-6
       {:class [(text-color i)]}
       i]
-     [:div.flex.relative
+     [:div.flex.relative.gap-1
       (people-view waiters {})]]]])
 
 (defn- floor-view [waiters]
@@ -91,8 +74,7 @@
     [:div.flex.flex-col-reverse.absolute.inset-0.mb-4
      (for [i (range 10)]
        (floor-row i (->> (get by-floor i)
-                         (sort-by :waiting-time)
-                         (waiters-positions))))]))
+                         (sort-by :waiting-time >))))]))
 
 (defn- board-view [{:keys [floor waiters passengers message finished]}]
   [:div.w-full.max-w-128.bg-white.border-1.border-black.rounded-lg
@@ -169,7 +151,7 @@
 
 (defn- psgs [p m]
   [:div.flex.gap-2.items-center
-    (people-view [p] {:help-view? true})
+    (people-view [p] {})
     [:span m]])
 
 (defn- help-view []
