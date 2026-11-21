@@ -150,7 +150,7 @@
     (stats-view state)
     [:div.flex.gap-2
      (button "C" [[:game/clean-floor]])
-     (button "L" [[:game/random-lift]])
+     (button "L" [[:game/current-dest]])
      (button "H" [[:game/screen :help]])]]])
 
 
@@ -195,8 +195,8 @@
     [:h3.font-bold "Clean floor (C)"]
     [:p "Remove all passengers from the bussiest floor. Available every 100 moves."]]
    [:div.flex.gap-2
-    [:h3.font-bold "Random destination (L)"]
-    [:p "All lift passengers go to the same random destination. Available every 60 moves."]]
+    [:h3.font-bold "Current destination (L)"]
+    [:p "All lift passengers go to the current floor. Available every 60 moves."]]
 
    [:div.mt-4 (button "↶" [[:game/back]])]])
 

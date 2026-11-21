@@ -22,7 +22,7 @@
                          ("w" "ArrowUp")   [[:game/move :up]]
                          ("s" "ArrowDown") [[:game/move :down]]
                          "c" [[:game/clean-floor]]
-                         "l" [[:game/random-lift]]
+                         "l" [[:game/current-dest]]
                          "h" [[:game/screen :help]]
                          "q" [[:game/screen :intro]])))
 
@@ -35,7 +35,7 @@
    :game/move  (fn [state dir] [[:store/reset (game/move state dir)]])
 
    :game/clean-floor (fn [_] [[:game/specials game/clean-longest-floor]])
-   :game/random-lift (fn [_] [[:game/specials game/random-lift]])
+   :game/current-dest (fn [_] [[:game/specials game/current-dest]])
    :game/specials (fn [state f] [[:store/reset (f state)] #_[:game/screen :game]])})
 
 

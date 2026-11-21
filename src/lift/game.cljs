@@ -117,7 +117,7 @@
 
 (def special-freq
   {:clean-floor 100
-   :random-lift 60})
+   :current-dest 60})
 
 (defn- available-special? [special-name special-value moves]
   (< special-value (quot moves (special-freq special-name))))
@@ -141,14 +141,13 @@
                                 " moves before it is available.")])))
 
 
-(defn random-lift [{:keys [passengers specials moves] :as state}]
-  (if (available-special? :random-lift (:random-lift specials) moves)
-    (let [new-destination (rand-int 10)]
-      (-> state
-          (update-in [:specials :random-lift] inc)
-          (assoc :passengers (map #(assoc % :end new-destination) passengers))))
+(defn current-dest [{:keys [passengers specials moves floor] :as state}]
+  (if (available-special? :current-dest (:current-dest specials) moves)
+    (-> state
+        (update-in [:specials :current-dest] inc)
+        (assoc :passengers (map #(assoc % :end floor) passengers)))
     (assoc state :message [:no-lift
                            (str "You're not alowed to change passengers' destination. "
                                 "You need to wait for additional "
-                                (mod (- moves) (special-freq :random-lift))
+                                (mod (- moves) (special-freq :current-dest))
                                 " moves before it is available.")])))
