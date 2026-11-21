@@ -41,7 +41,8 @@
    :score 0
    :message []
    :waiters (repeatedly 3 create-waiter)
-   :specials {:clean-floor 0}
+   :specials {:clean-floor 0
+              :current-dest 0}
    :passengers []
    :finished []})
 
@@ -116,8 +117,8 @@
 
 
 (def special-freq
-  {:clean-floor 100
-   :current-dest 60})
+  {:clean-floor 60
+   :current-dest 75})
 
 (defn- available-special? [special-name special-value moves]
   (< special-value (quot moves (special-freq special-name))))

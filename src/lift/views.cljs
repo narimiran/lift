@@ -173,12 +173,13 @@
    [:p "Time doesn't matter, just moves. Take your time, choose passengers and your paths carefuly."]
 
    [:h2.text-xl.font-bold.mt-4 "Specials"]
-   [:div.flex.gap-2
+   [:div.grid.gap-2.items-center
+    {:class ["grid-cols-[120px_1fr]"]}
     [:h3.font-bold "Clean floor (C)"]
-    [:p "Remove all passengers from the bussiest floor. Available every 100 moves."]]
-   [:div.flex.gap-2
+    [:p "Remove all passengers from the bussiest floor. Available every 60 moves."]
     [:h3.font-bold "Current destination (L)"]
-    [:p "All lift passengers go to the current floor. Available every 60 moves."]]
+    [:p "All lift passengers go to the current floor. Available every 75 moves."]]
+   [:p "Specials can make or break your game. Use them wisely."]
 
    [:div.mt-4 (button "↶" [[:game/back]])]])
 
