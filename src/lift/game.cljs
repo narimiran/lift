@@ -26,9 +26,9 @@
 
 (defn- maybe-create-waiter [waiters moves]
   (let [h (quot moves 40)]
-    (reduce (fn [w _]
+    (reduce (fn [w i]
               (cond-> w
-                (< (rand) 0.25) (conj (create-waiter))))
+                (< (rand) (- 0.35 (* 0.05 i))) (conj (create-waiter))))
             (cond-> waiters
               (< (rand) 0.5) (conj (create-waiter)))
             (range h))))
