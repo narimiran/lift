@@ -36,8 +36,8 @@ jobs:
       - name: Install JS deps
         run: npm ci
         
-      - name: Run Shadow
-        run: npx shadow-cljs release app
+      - name: Build CSS and a release version of the app
+        run: make release
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v5
