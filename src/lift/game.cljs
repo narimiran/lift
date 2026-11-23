@@ -1,4 +1,5 @@
-(ns lift.game)
+(ns lift.game
+  (:require [cljs.reader :as r]))
 
 
 (def lift-capacity 10)
@@ -33,28 +34,45 @@
               (< (rand) 0.5) (conj (create-waiter)))
             (range h))))
 
-(defn reset-state [screen-type]
-  {:screen-type (or screen-type :intro)
-   :high-score (or (long (.. js/window -localStorage (getItem :lift-high-score))) 0)
-   :floor 0
-   :moves 0
-   :score 0
-   :message []
-   :waiters (repeatedly 3 create-waiter)
-   :specials {:clean-floor 0
-              :current-dest 0}
-   :passengers []
-   :finished []})
+(defn- load [k]
+  (try
+    (some-> (.. js/window -localStorage (getItem k))
+            r/read-string)
+    (catch :default _ nil)))
 
-(defn maybe-end [{:keys [score high-score waiters] :as state}]
+(defn- save! [k data]
+  (try
+    (some-> (.. js/window -localStorage (setItem k (pr-str data))))
+    (catch :default _ nil)))
+
+(defn reset-state [screen-type]
+  (let [best-result (load :lift-best-result)]
+    {:screen-type (or screen-type :intro)
+     :best-result best-result
+     :floor 0
+     :moves 0
+     :delivered 0
+     :score 0
+     :message []
+     :waiters (repeatedly 3 create-waiter)
+     :specials {:clean-floor 0
+                :current-dest 0}
+     :passengers []
+     :finished []}))
+
+(defn maybe-end [{:keys [score moves delivered best-result waiters] :as state}]
   (if (some (fn [{:keys [waiting-time max-wait]}]
               (>= waiting-time max-wait))
             waiters)
-    (let [record (max score high-score)]
-      (.. js/window -localStorage (setItem :lift-high-score record))
+    (let [record (if (> score (long (get best-result :score 0)))
+                   {:score score
+                    :moves moves
+                    :delivered delivered}
+                   best-result)]
+      (save! :lift-best-result record)
       (-> state
           (assoc :screen-type :over)
-          (assoc :high-score record)))
+          (assoc :best-result record)))
     state))
 
 (defn- increase-time [state people field]
@@ -109,6 +127,7 @@
       (-> state
           (assoc :passengers (if full-cap? remaining-passengers passengers'))
           (cond-> (not full-cap?) (assoc :waiters remaining-waiters))
+          (update :delivered + (count trip-done))
           (update :score + move-score)
           (cond-> (or (not full-cap?) (seq trip-done)) tick)
           (assoc :finished trip-done')

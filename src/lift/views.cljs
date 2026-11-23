@@ -137,11 +137,15 @@
 
 
 
-(defn- end-view [{:keys [score moves high-score]}]
+(defn- end-view [{:keys [score moves delivered best-result]}]
   [:div.flex.flex-col.w-full.max-w-128.p-4.gap-8.justify-center.bg-orange-100.mx-auto
    [:h1.text-5xl.py-8.justify-self-center.font-mono.font-black "Game over"]
-   [:span.font-mono "Current score: " score " (" moves " moves)."]
-   [:span.font-mono.mb-8  "Your best score so far: " high-score]
+   [:span.font-mono
+    "Current score: " [:span.font-bold score]
+    " (" moves " moves with " delivered " delivered passengers)."]
+   [:span.font-mono.mb-8
+    "Your best score so far: " [:span.font-bold (:score best-result)]
+    " (" (:moves best-result) " moves with " (:delivered best-result) " delivered passengers)."]
    [:button.p-8.font-mono.border-1.border-black.rounded-lg.cursor-pointer
     {:on {:click [[:game/start]]}}
     "press N for a new game"]])
@@ -165,7 +169,7 @@
    (psgs {:end 5 :max-wait 100 :impatient? true} "Impatient passenger. Hates waiting and wasting time.")
    (psgs {:end 8 :max-wait 100 :relaxed? true} "Relaxed passenger. Doesn't mind waiting longer.")
    (psgs {:end 1 :waiting-time 30 :max-wait 39} "Waiting for a long time. Pick it up soon (here you have 9 more moves or you'll lose the game). Once in the lift, you're safe.")
-   [:p "If you take a passenger directly (no going in wrong direction nor opening
+   [:p "If you take a passenger directly (not going in wrong direction at any point nor opening
         the doors along the way) to their destination, you receive a bonus.
         The longer the passenger waits and travels, the lower the score.
         The longer the distance between the starting and ending floor, the higher the score."]
